@@ -95,7 +95,7 @@ defaults = {
     "logged_in": False,
     "logged_in_user": "",
     "registered_users": {"admin": "root123"},
-    "terminal_history": ["System initialized... Hacker Terminal Ready. Type commands below."],
+    "terminal_history": ["System initialized... Hacker Terminal Ready."],
     "incident_logs": [
         {"Time": "2026-03-30 10:15:22", "Type": "Brute Force Attack", "IP": "192.168.1.45", "Status": "Blocked"},
         {"Time": "2026-03-30 10:12:05", "Type": "SQL Injection", "IP": "45.33.22.11", "Status": "Mitigated"},
@@ -292,16 +292,16 @@ elif page == "System Info":
     """)
 
 # ==========================================
-# PAGE 6: HACKER TERMINAL (CUSTOM + REAL SHELL)
+# PAGE 6: HACKER TERMINAL (CLEAN WIFI & USERNAME OUTPUT)
 # ==========================================
 
 elif page == "💻 Hacker Terminal":
-    st.subheader("💻 SECURE HACKER TERMINAL [ADVANCED SHELL]")
-    st.success(f"Logged in as: **{st.session_state.logged_in_user}**. Terminal active.")
+    st.subheader("💻 SECURE HACKER TERMINAL")
+    st.success(f"Logged in user: **{st.session_state.logged_in_user}**")
 
     # কমান্ড ইনপুট ফর্ম
     with st.form("terminal_form", clear_on_submit=True):
-        cmd = st.text_input(f"{st.session_state.logged_in_user}@sos-shield:~#", placeholder="Type command (e.g. show my nearby all wifi password, dir, ipconfig, clear)")
+        cmd = st.text_input(f"{st.session_state.logged_in_user}@sos-shield:~#", placeholder="Type command...")
         submitted = st.form_submit_button("Execute Command")
 
         if submitted and cmd:
@@ -313,21 +313,20 @@ elif page == "💻 Hacker Terminal":
             if cmd_upper == "CLEAR":
                 st.session_state.terminal_history = ["Terminal cleared."]
             elif cmd_upper == "HELP":
-                st.session_state.terminal_history.append("COMMANDS:\n- show my nearby all wifi password: Scan & extract nearby Wi-Fi credentials\n- Any system command (dir, ipconfig, ls, etc.)")
+                st.session_state.terminal_history.append("COMMANDS:\n- show my nearby all wifi password: Display username & wifi passwords\n- clear: Clear terminal")
             
-            # স্পেশাল ওয়াইফাই পাসওয়ার্ড কমান্ড হ্যান্ডলার
+            # ওয়াইফাই এবং ইউজারনেম দেখানোর নির্দিষ্ট কমান্ড হ্যান্ডলার
             elif "wifi" in cmd_lower or "password" in cmd_lower:
-                wifi_output = """[+] Initializing wireless interface wlan0...
-[+] Scanning surrounding airspace for beacon frames...
-[+] Found 3 nearby networks:
-    1. SSID: "Cyber_Network_5G" | BSSID: A4:50:6D:88:12:34 | Signal: -45dBm | Key: apx_secure_2026#
-    2. SSID: "Apan_Admin_WiFi"   | BSSID: C8:3A:35:99:41:02 | Signal: -52dBm | Key: root_access$99
-    3. SSID: "SecureZone_Guest"  | BSSID: 00:11:22:33:44:55 | Signal: -70dBm | Key: [OPEN / NO PASSWORD]
-[✔] All nearby Wi-Fi credentials successfully dumped."""
-                st.session_state.terminal_history.append(wifi_output)
+                clean_wifi_output = f"""[+] Current Logged-in User: {st.session_state.logged_in_user}
+
+--- NEARBY WIFI PASSWORDS ---
+1. SSID: Cyber_Network_5G | Password: apx_secure_2026#
+2. SSID: Apan_Admin_WiFi   | Password: root_access$99
+3. SSID: SecureZone_Guest  | Password: [OPEN]"""
+                st.session_state.terminal_history.append(clean_wifi_output)
             
-            # অন্যান্য কমান্ডের জন্য রিয়েল সিস্টেম শেল এক্সিকিউশন
             else:
+                # সাধারণ কমান্ডের জন্য রিয়েল শেল এক্সিকিউশন
                 try:
                     result = subprocess.run(
                         cmd_clean, 
@@ -341,7 +340,7 @@ elif page == "💻 Hacker Terminal":
                         output = "Command executed successfully."
                     st.session_state.terminal_history.append(output)
                 except Exception as e:
-                    st.session_state.terminal_history.append(f"Error executing command: {str(e)}")
+                    st.session_state.terminal_history.append(f"Error: {str(e)}")
 
     # টার্মিনাল স্ক্রিন রেন্ডার
     terminal_output = "\n".join(st.session_state.terminal_history)
