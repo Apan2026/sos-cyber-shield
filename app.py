@@ -1,13 +1,15 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+from datetime import datetime, timezone
+import random
 
 # ==========================================
 # CONFIG
 # ==========================================
 
 st.set_page_config(
-    page_title="NXMINI CYBER GUARD X",
+    page_title="SOS CYBER SHIELD",
     page_icon="🛡️",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -86,7 +88,7 @@ for key, value in defaults.items():
 # HEADER
 # ==========================================
 
-st.markdown('<div class="sos-title">🚨 NXMINI CYBER GUARD X</div>', unsafe_allow_html=True)
+st.markdown('<div class="sos-title">🚨 SOS CYBER SHIELD</div>', unsafe_allow_html=True)
 st.markdown('<div class="sos-subtitle">ADVANCED INCIDENT RESPONSE & CYBER THREAT MONITORING SYSTEM</div>', unsafe_allow_html=True)
 st.divider()
 
@@ -94,7 +96,7 @@ st.divider()
 # SIDEBAR NAVIGATION
 # ==========================================
 
-st.sidebar.markdown("## 🛡️ NXMINI COMMAND")
+st.sidebar.markdown("## 🛡️ CYBER COMMAND")
 
 page = st.sidebar.radio(
     "NAVIGATION",
@@ -118,7 +120,7 @@ st.sidebar.info("Encrypted Tunnel: SECURE 🔒")
 
 if page == "Emergency SOS & Control":
     st.subheader("⚠️ EMERGENCY CYBER RESPONSE (SOS)")
-
+    
     st.warning("If a severe security breach, ransomware attack, or unauthorized access is detected, trigger the SOS protocol immediately to lock down endpoints.")
 
     col1, col2 = st.columns(2)
@@ -150,6 +152,7 @@ elif page == "Threat Intelligence Map":
     st.subheader("🌍 LIVE ATTACK ORIGIN MAP")
     st.info("Visualizing simulated malicious IP attempts and geographic attack vectors.")
 
+    # ডামি অ্যাটাক ডেটা
     attack_data = pd.DataFrame([
         {"Latitude": 37.7749, "Longitude": -122.4194, "City": "San Francisco", "Attempts": 140, "Threat": "DDoS"},
         {"Latitude": 51.5074, "Longitude": -0.1278, "City": "London", "Attempts": 85, "Threat": "Brute Force"},
@@ -183,17 +186,18 @@ elif page == "Threat Intelligence Map":
 
 elif page == "Security Log Analyzer":
     st.subheader("🔍 VULNERABILITY & LOG AUDIT")
-
+    
     uploaded_file = st.file_uploader("Upload server log or configuration file (.txt, .log)", type=["txt", "log"])
 
     if uploaded_file is not None:
         st.success("File uploaded successfully! Running deep security heuristic scan...")
         with st.spinner("Analyzing code patterns and vulnerabilities..."):
+            # ডামি স্ক্যান ফলাফল
             st.markdown("### Scan Report Summary")
             st.error("⚠️ 2 High-Risk Vulnerabilities Detected!")
             st.warning("⚡ 1 Medium-Risk Configuration Warning.")
             st.success("✅ 14 Security Checks Passed.")
-
+            
             issues_df = pd.DataFrame([
                 {"Severity": "HIGH", "Component": "Authentication Module", "Issue": "Weak password hashing (MD5 detected)"},
                 {"Severity": "HIGH", "Component": "API Endpoint", "Issue": "Missing Rate Limiting header"},
@@ -211,7 +215,7 @@ elif page == "Incident Playbook":
     st.subheader("📖 INCIDENT RESPONSE PLAYBOOK")
     st.markdown("""
     Follow these standard operational procedures (SOP) during active cyber threats:
-
+    
     1. **Identify & Contain:** Isolate affected servers immediately from the primary network to prevent lateral movement.
     2. **Eradicate:** Remove malicious scripts, patch vulnerable entry points, and revoke compromised API keys.
     3. **Recover:** Restore systems from clean, verified offline backups and run integrity checks.
@@ -223,9 +227,9 @@ elif page == "Incident Playbook":
 # ==========================================
 
 elif page == "System Info":
-    st.subheader("ℹ️ ABOUT NXMINI CYBER GUARD X")
+    st.subheader("ℹ️ ABOUT SOS CYBER SHIELD")
     st.markdown("""
-    **Project Name:** NXMINI CYBER GUARD X  
+    **Project Name:** SOS Cyber Shield  
     **Version:** 1.0.0 (Production Ready)  
     **Framework:** Streamlit & Python  
 
@@ -236,5 +240,4 @@ elif page == "System Info":
 # FOOTER
 # ==========================================
 st.divider()
-st.caption("NXMINI CYBER GUARD X | Secure Incident Management Portal | Protected by Advanced Encryption")
-
+st.caption("SOS CYBER SHIELD | Secure Incident Management Portal | Protected by Advanced Encryption")
