@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-from datetime import datetime, timezone
+import subprocess
 
 # ==========================================
 # CONFIG
@@ -94,8 +94,8 @@ defaults = {
     "sos_triggered": False,
     "logged_in": False,
     "logged_in_user": "",
-    "registered_users": {"admin": "root123"},  # ডিফল্ট অ্যাডমিন অ্যাকাউন্ট
-    "terminal_history": ["System initialized... Unlimited shell mode ready. Type 'help' for info."],
+    "registered_users": {"admin": "root123"},
+    "terminal_history": ["System initialized... Real System Shell Mode Active. Type commands below."],
     "incident_logs": [
         {"Time": "2026-03-30 10:15:22", "Type": "Brute Force Attack", "IP": "192.168.1.45", "Status": "Blocked"},
         {"Time": "2026-03-30 10:12:05", "Type": "SQL Injection", "IP": "45.33.22.11", "Status": "Mitigated"},
@@ -161,7 +161,6 @@ else:
 
 st.sidebar.divider()
 
-# মেনু অপশন
 nav_options = [
     "Dashboard Overview",
     "Threat Map & Analytics",
@@ -293,16 +292,16 @@ elif page == "System Info":
     """)
 
 # ==========================================
-# PAGE 6: HACKER TERMINAL (UNLIMITED SHELL)
+# PAGE 6: HACKER TERMINAL (REAL SHELL)
 # ==========================================
 
 elif page == "💻 Hacker Terminal":
-    st.subheader("💻 SECURE HACKER TERMINAL [UNLIMITED SHELL]")
-    st.success(f"Logged in as: **{st.session_state.logged_in_user}**. Unlimited command execution enabled.")
+    st.subheader("💻 SECURE HACKER TERMINAL [REAL SHELL]")
+    st.success(f"Logged in as: **{st.session_state.logged_in_user}**. Real system command execution enabled.")
 
     # কমান্ড ইনপুট ফর্ম
     with st.form("terminal_form", clear_on_submit=True):
-        cmd = st.text_input(f"{st.session_state.logged_in_user}@sos-shield:~#", placeholder="Type any command (e.g. nmap, python script.py, status, clear)")
+        cmd = st.text_input(f"{st.session_state.logged_in_user}@sos-shield:~#", placeholder="Type any system command (e.g. dir, ipconfig, python --version, clear)")
         submitted = st.form_submit_button("Execute Command")
 
         if submitted and cmd:
@@ -311,21 +310,24 @@ elif page == "💻 Hacker Terminal":
             st.session_state.terminal_history.append(f"{st.session_state.logged_in_user}@sos-shield:~# {cmd_clean}")
             
             if cmd_upper == "CLEAR":
-                st.session_state.terminal_history = ["Terminal cleared. Ready for custom commands."]
+                st.session_state.terminal_history = ["Terminal cleared."]
             elif cmd_upper == "HELP":
-                st.session_state.terminal_history.append("UNLIMITED SHELL MODE: You can type ANY command or tool name. Every input is processed dynamically.")
+                st.session_state.terminal_history.append("REAL SHELL: Type any valid system command (e.g., 'dir' or 'ls', 'ipconfig', 'python').")
             else:
-                # ডাইনামিক বা আনলিমিটেড কমান্ড প্রসেসর
-                parts = cmd_clean.split(" ")
-                base_cmd = parts[0].lower()
-                target = parts[1] if len(parts) > 1 else "target-system"
-                
-                dynamic_response = f"[+] Executing process: '{base_cmd}'\n"
-                dynamic_response += f"[*] Target resolved: {target}\n"
-                dynamic_response += f"[*] Bypassing security filters... Success.\n"
-                dynamic_response += f"[⚡] Shell Output: Command '{cmd_clean}' processed successfully with status code 0."
-                
-                st.session_state.terminal_history.append(dynamic_response)
+                try:
+                    result = subprocess.run(
+                        cmd_clean, 
+                        shell=True, 
+                        capture_output=True, 
+                        text=True, 
+                        timeout=5
+                    )
+                    output = result.stdout if result.stdout else result.stderr
+                    if not output:
+                        output = "Command executed successfully."
+                    st.session_state.terminal_history.append(output)
+                except Exception as e:
+                    st.session_state.terminal_history.append(f"Error executing command: {str(e)}")
 
     # টার্মিনাল স্ক্রিন রেন্ডার
     terminal_output = "\n".join(st.session_state.terminal_history)
