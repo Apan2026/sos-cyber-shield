@@ -2,7 +2,6 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 from datetime import datetime, timezone
-import random
 
 # ==========================================
 # CONFIG
@@ -16,52 +15,63 @@ st.set_page_config(
 )
 
 # ==========================================
-# DESIGN & STYLING (Cyberpunk / Security Theme)
+# DESIGN & STYLING (Hacker Dashboard Theme)
 # ==========================================
 
 st.markdown("""
 <style>
 .stApp {
-    background: #080c14;
-    color: #e0f2fe;
+    background: #050b10;
+    color: #00ff66;
 }
 [data-testid="stSidebar"] {
-    background: #0d1526;
-    border-right: 1px solid #1e3a8a;
+    background: #081118;
+    border-right: 1px solid #10b981;
 }
 h1, h2, h3 {
-    color: #38bdf8 !important;
+    color: #00ff66 !important;
+    font-family: monospace;
+    letter-spacing: 2px;
 }
-p, label {
+p, label, span {
     color: #94a3b8;
+    font-family: monospace;
 }
 div[data-testid="stMetric"] {
-    background: #0f172a;
-    border: 1px solid #1e293b;
+    background: #0a192f;
+    border: 1px solid #10b981;
     padding: 14px;
-    border-radius: 10px;
+    border-radius: 6px;
+    box-shadow: 0 0 10px rgba(0, 255, 102, 0.1);
+}
+div[data-testid="stMetric"] label {
+    color: #10b981 !important;
 }
 .stButton button {
-    background: #0284c7;
-    color: white;
-    border: 1px solid #38bdf8;
-    border-radius: 8px;
+    background: #065f46;
+    color: #ffffff;
+    border: 1px solid #34d399;
+    border-radius: 6px;
     font-weight: bold;
+    font-family: monospace;
 }
 .stButton button:hover {
-    background: #0369a1;
-    color: white;
+    background: #047857;
+    color: #00ff66;
+    border: 1px solid #00ff66;
 }
 .sos-title {
-    color: #f43f5e;
-    font-size: 36px;
+    color: #ff3333;
+    font-size: 32px;
     font-weight: 900;
     letter-spacing: 3px;
+    font-family: monospace;
 }
 .sos-subtitle {
-    color: #38bdf8;
-    font-size: 12px;
+    color: #10b981;
+    font-size: 11px;
     letter-spacing: 2px;
+    font-family: monospace;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -76,8 +86,7 @@ defaults = {
         {"Time": "2026-03-30 10:15:22", "Type": "Brute Force Attack", "IP": "192.168.1.45", "Status": "Blocked"},
         {"Time": "2026-03-30 10:12:05", "Type": "SQL Injection", "IP": "45.33.22.11", "Status": "Mitigated"},
         {"Time": "2026-03-30 09:50:11", "Type": "Unauthorized Access", "IP": "10.0.0.99", "Status": "Investigating"}
-    ],
-    "audit_results": None
+    ]
 }
 
 for key, value in defaults.items():
@@ -88,21 +97,21 @@ for key, value in defaults.items():
 # HEADER
 # ==========================================
 
-st.markdown('<div class="sos-title">🚨 SOS CYBER SHIELD</div>', unsafe_allow_html=True)
-st.markdown('<div class="sos-subtitle">ADVANCED INCIDENT RESPONSE & CYBER THREAT MONITORING SYSTEM</div>', unsafe_allow_html=True)
+st.markdown('<div class="sos-title">⚡ SOS CYBER SHIELD // COMMAND CENTER</div>', unsafe_allow_html=True)
+st.markdown('<div class="sos-subtitle">SECURE OPERATIONS & GLOBAL THREAT INTELLIGENCE INTERFACE</div>', unsafe_allow_html=True)
 st.divider()
 
 # ==========================================
 # SIDEBAR NAVIGATION
 # ==========================================
 
-st.sidebar.markdown("## 🛡️ CYBER COMMAND")
+st.sidebar.markdown("## 🛡️ SYSTEM MENU")
 
 page = st.sidebar.radio(
     "NAVIGATION",
     [
-        "Emergency SOS & Control",
-        "Threat Intelligence Map",
+        "Dashboard Overview",
+        "Threat Map & Analytics",
         "Security Log Analyzer",
         "Incident Playbook",
         "System Info"
@@ -110,54 +119,56 @@ page = st.sidebar.radio(
 )
 
 st.sidebar.divider()
-st.sidebar.markdown("### SECURITY STATUS")
-st.sidebar.success("Firewall: ACTIVE 🟢")
-st.sidebar.info("Encrypted Tunnel: SECURE 🔒")
+st.sidebar.markdown("### SYSTEM STATUS")
+st.sidebar.success("FIREWALL: ONLINE [🟢]")
+st.sidebar.info("ENCRYPTION: AES-256 [🔒]")
 
 # ==========================================
-# PAGE 1: EMERGENCY SOS & CONTROL
+# PAGE 1: DASHBOARD OVERVIEW
 # ==========================================
 
-if page == "Emergency SOS & Control":
-    st.subheader("⚠️ EMERGENCY CYBER RESPONSE (SOS)")
+if page == "Dashboard Overview":
+    st.subheader("📊 THREAT METRICS & OVERVIEW")
     
-    st.warning("If a severe security breach, ransomware attack, or unauthorized access is detected, trigger the SOS protocol immediately to lock down endpoints.")
-
-    col1, col2 = st.columns(2)
-
-    with col1:
-        if st.button("🚨 TRIGGER EMERGENCY LOCKDOWN", use_container_width=True):
-            st.session_state.sos_triggered = True
-            st.error("EMERGENCY PROTOCOL ACTIVATED! All critical ports locked, sessions terminated.")
-
-    with col2:
-        if st.button("🛡️ RESTORE SYSTEM NORMAL", use_container_width=True):
-            st.session_state.sos_triggered = False
-            st.success("System restored to normal operational mode.")
-
-    if st.session_state.sos_triggered:
-        st.error("🔴 **SYSTEM STATUS: LOCKDOWN IN PROGRESS** — Unauthorized external traffic is currently blocked.")
-    else:
-        st.success("🟢 **SYSTEM STATUS: ALL SYSTEMS SECURE** — Monitoring live network activity.")
+    col1, col2, col3, col4 = st.columns(4)
+    col1.metric("TOTAL ATTACKS", "1,428", "+12 today")
+    col2.metric("BLOCKED IPS", "342", "Secure")
+    col3.metric("ACTIVE ALERTS", "2", "Critical")
+    col4.metric("SYSTEM LOAD", "14.2%", "Optimal")
 
     st.divider()
-    st.markdown("### Recent Incident Log Feed")
-    st.dataframe(pd.DataFrame(st.session_state.incident_logs), use_container_width=True, hide_index=True)
+
+    col_left, col_right = st.columns(2)
+    with col_left:
+        st.markdown("### 🚨 EMERGENCY LOCKDOWN CONTROL")
+        if st.button("TRIGGER EMERGENCY LOCKDOWN", use_container_width=True):
+            st.session_state.sos_triggered = True
+            st.error("EMERGENCY PROTOCOL ACTIVATED! Network isolated.")
+        
+        if st.session_state.sos_triggered:
+            st.error("STATUS: SYSTEM IN LOCKDOWN MODE")
+        else:
+            st.success("STATUS: NORMAL MONITORING")
+
+    with col_right:
+        st.markdown("### 📋 RECENT INCIDENT LOGS")
+        st.dataframe(pd.DataFrame(st.session_state.incident_logs), use_container_width=True, hide_index=True)
 
 # ==========================================
-# PAGE 2: THREAT INTELLIGENCE MAP
+# PAGE 2: THREAT MAP & ANALYTICS
 # ==========================================
 
-elif page == "Threat Intelligence Map":
-    st.subheader("🌍 LIVE ATTACK ORIGIN MAP")
-    st.info("Visualizing simulated malicious IP attempts and geographic attack vectors.")
+elif page == "Threat Map & Analytics":
+    st.subheader("🌍 GLOBAL ATTACK MAP & TELEMETRY")
+    st.info("Visualizing global threat vectors and malicious IP origins in real-time.")
 
-    # ডামি অ্যাটাক ডেটা
+    # ডামি অ্যাটাক ডেটা (ছবির ম্যাপের সাথে সামঞ্জস্যপূর্ণ)
     attack_data = pd.DataFrame([
-        {"Latitude": 37.7749, "Longitude": -122.4194, "City": "San Francisco", "Attempts": 140, "Threat": "DDoS"},
-        {"Latitude": 51.5074, "Longitude": -0.1278, "City": "London", "Attempts": 85, "Threat": "Brute Force"},
-        {"Latitude": 23.8103, "Longitude": 90.4125, "City": "Dhaka", "Attempts": 210, "Threat": "SQL Injection"},
-        {"Latitude": 35.6762, "Longitude": 139.6503, "City": "Tokyo", "Attempts": 60, "Threat": "Port Scanning"}
+        {"Latitude": 37.7749, "Longitude": -122.4194, "City": "San Francisco", "Attempts": 180, "Threat": "DDoS"},
+        {"Latitude": 51.5074, "Longitude": -0.1278, "City": "London", "Attempts": 120, "Threat": "Brute Force"},
+        {"Latitude": 23.8103, "Longitude": 90.4125, "City": "Dhaka", "Attempts": 250, "Threat": "SQL Injection"},
+        {"Latitude": 35.6762, "Longitude": 139.6503, "City": "Tokyo", "Attempts": 90, "Threat": "Port Scan"},
+        {"Latitude": -22.9068, "Longitude": -43.1729, "City": "Rio de Janeiro", "Attempts": 110, "Threat": "Malware"}
     ])
 
     fig = px.scatter_map(
@@ -167,14 +178,14 @@ elif page == "Threat Intelligence Map":
         size="Attempts",
         color="Threat",
         hover_name="City",
-        zoom=2,
-        height=550
+        zoom=1.5,
+        height=600
     )
 
     fig.update_layout(
-        map_style="open-street-map",
-        paper_bgcolor="#080c14",
-        font_color="#e0f2fe",
+        map_style="carto-darkmatter",  # হ্যাকার লুকের জন্য ডার্ক ম্যাপ স্টাইল
+        paper_bgcolor="#050b10",
+        font_color="#00ff66",
         margin=dict(l=0, r=0, t=0, b=0)
     )
 
@@ -185,27 +196,21 @@ elif page == "Threat Intelligence Map":
 # ==========================================
 
 elif page == "Security Log Analyzer":
-    st.subheader("🔍 VULNERABILITY & LOG AUDIT")
+    st.subheader("🔍 LOG & VULNERABILITY INSPECTOR")
     
-    uploaded_file = st.file_uploader("Upload server log or configuration file (.txt, .log)", type=["txt", "log"])
+    uploaded_file = st.file_uploader("Upload server log / code snippet (.txt, .log)", type=["txt", "log"])
 
     if uploaded_file is not None:
-        st.success("File uploaded successfully! Running deep security heuristic scan...")
-        with st.spinner("Analyzing code patterns and vulnerabilities..."):
-            # ডামি স্ক্যান ফলাফল
-            st.markdown("### Scan Report Summary")
-            st.error("⚠️ 2 High-Risk Vulnerabilities Detected!")
-            st.warning("⚡ 1 Medium-Risk Configuration Warning.")
-            st.success("✅ 14 Security Checks Passed.")
-            
+        st.success("File successfully parsed. Executing deep security heuristic scan...")
+        with st.spinner("Analyzing vulnerabilities..."):
+            st.error("⚠️ 2 Critical Security Vulnerabilities Found!")
             issues_df = pd.DataFrame([
-                {"Severity": "HIGH", "Component": "Authentication Module", "Issue": "Weak password hashing (MD5 detected)"},
-                {"Severity": "HIGH", "Component": "API Endpoint", "Issue": "Missing Rate Limiting header"},
-                {"Severity": "MEDIUM", "Component": "Database Config", "Issue": "Default admin port exposed"}
+                {"Severity": "HIGH", "Module": "Auth API", "Description": "Weak hashing algorithm detected (MD5)"},
+                {"Severity": "HIGH", "Module": "Database", "Description": "SQL Injection risk in query parameter"}
             ])
             st.dataframe(issues_df, use_container_width=True, hide_index=True)
     else:
-        st.info("Upload a log file above to test vulnerability auditing.")
+        st.info("Upload a log file to begin security auditing.")
 
 # ==========================================
 # PAGE 4: INCIDENT PLAYBOOK
@@ -214,12 +219,9 @@ elif page == "Security Log Analyzer":
 elif page == "Incident Playbook":
     st.subheader("📖 INCIDENT RESPONSE PLAYBOOK")
     st.markdown("""
-    Follow these standard operational procedures (SOP) during active cyber threats:
-    
-    1. **Identify & Contain:** Isolate affected servers immediately from the primary network to prevent lateral movement.
-    2. **Eradicate:** Remove malicious scripts, patch vulnerable entry points, and revoke compromised API keys.
-    3. **Recover:** Restore systems from clean, verified offline backups and run integrity checks.
-    4. **Post-Incident Analysis:** Document the attack vectors, review firewall logs, and update defensive rules.
+    - **Phase 1 (Containment):** Isolate infected endpoints and block malicious IPs immediately.
+    - **Phase 2 (Eradication):** Patch vulnerabilities, remove backdoor scripts, and reset compromised credentials.
+    - **Phase 3 (Recovery):** Restore services from secure offline backups and verify system integrity.
     """)
 
 # ==========================================
@@ -227,17 +229,15 @@ elif page == "Incident Playbook":
 # ==========================================
 
 elif page == "System Info":
-    st.subheader("ℹ️ ABOUT SOS CYBER SHIELD")
+    st.subheader("ℹ️ SYSTEM INFORMATION")
     st.markdown("""
-    **Project Name:** SOS Cyber Shield  
-    **Version:** 1.0.0 (Production Ready)  
-    **Framework:** Streamlit & Python  
-
-    Designed to provide rapid incident response coordination, threat tracking, and automated log vulnerability scanning.
+    **Project:** SOS Cyber Shield (Hacker Terminal Edition)  
+    **Framework:** Streamlit & Plotly  
+    **Design Theme:** Cyberpunk Dark / Terminal HUD  
     """)
 
 # ==========================================
 # FOOTER
 # ==========================================
 st.divider()
-st.caption("SOS CYBER SHIELD | Secure Incident Management Portal | Protected by Advanced Encryption")
+st.caption("SOS CYBER SHIELD // SECURE COMMAND INTERFACE // ALL RIGHTS RESERVED")
