@@ -7,7 +7,7 @@ import plotly.express as px
 # ==========================================
 
 st.set_page_config(
-    page_title="SOS CYBER SHIELD",
+    page_title="NXMINI CYBER GUARD X",
     page_icon="🛡️",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -86,7 +86,7 @@ for key, value in defaults.items():
 # HEADER
 # ==========================================
 
-st.markdown('<div class="sos-title">🚨 SOS CYBER SHIELD</div>', unsafe_allow_html=True)
+st.markdown('<div class="sos-title">🚨 NXMINI CYBER GUARD X</div>', unsafe_allow_html=True)
 st.markdown('<div class="sos-subtitle">ADVANCED INCIDENT RESPONSE & CYBER THREAT MONITORING SYSTEM</div>', unsafe_allow_html=True)
 st.divider()
 
@@ -94,7 +94,7 @@ st.divider()
 # SIDEBAR NAVIGATION
 # ==========================================
 
-st.sidebar.markdown("## 🛡️ CYBER COMMAND")
+st.sidebar.markdown("## 🛡️ NXMINI COMMAND")
 
 page = st.sidebar.radio(
     "NAVIGATION",
@@ -223,9 +223,9 @@ elif page == "Incident Playbook":
 # ==========================================
 
 elif page == "System Info":
-    st.subheader("ℹ️ ABOUT SOS CYBER SHIELD")
+    st.subheader("ℹ️ ABOUT NXMINI CYBER GUARD X")
     st.markdown("""
-    **Project Name:** SOS Cyber Shield  
+    **Project Name:** NXMINI CYBER GUARD X  
     **Version:** 1.0.0 (Production Ready)  
     **Framework:** Streamlit & Python  
 
@@ -236,4 +236,5 @@ elif page == "System Info":
 # FOOTER
 # ==========================================
 st.divider()
-st.caption("SOS CYBER SHIELD | Secure Incident Management Portal | Protected by Advanced Encryption")
+st.caption("NXMINI CYBER GUARD X | Secure Incident Management Portal | Protected by Advanced Encryption")
+

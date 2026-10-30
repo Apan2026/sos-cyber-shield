@@ -1,4 +1,4 @@
-# SOS Cyber Shield
+# NXMINI CYBER GUARD X
 
 A Streamlit-based cybersecurity dashboard for simulating incident response, threat monitoring, security log analysis, and emergency lockdown controls.
 
