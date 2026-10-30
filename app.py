@@ -94,7 +94,7 @@ defaults = {
     "logged_in": False,
     "logged_in_user": "",
     "registered_users": {"admin": "root123"},  # ডিফল্ট অ্যাডমিন অ্যাকাউন্ট
-    "terminal_history": ["System initialized... Type commands or select options."],
+    "terminal_history": ["System initialized... Type 'help' for available commands."],
     "incident_logs": [
         {"Time": "2026-03-30 10:15:22", "Type": "Brute Force Attack", "IP": "192.168.1.45", "Status": "Blocked"},
         {"Time": "2026-03-30 10:12:05", "Type": "SQL Injection", "IP": "45.33.22.11", "Status": "Mitigated"},
@@ -301,7 +301,7 @@ elif page == "💻 Hacker Terminal":
 
     # কমান্ড ইনপুট ফর্ম
     with st.form("terminal_form", clear_on_submit=True):
-        cmd = st.text_input(f"{st.session_state.logged_in_user}@sos-shield:~#", placeholder="Type command (e.g. scan, status, ipconfig, clear)")
+        cmd = st.text_input(f"{st.session_state.logged_in_user}@sos-shield:~#", placeholder="Type command (e.g. help, scan, ping, status, clear)")
         submitted = st.form_submit_button("Execute Command")
 
         if submitted and cmd:
@@ -310,14 +310,21 @@ elif page == "💻 Hacker Terminal":
             
             if cmd_upper == "CLEAR":
                 st.session_state.terminal_history = ["Terminal cleared."]
+            elif cmd_upper == "HELP":
+                st.session_state.terminal_history.append("Available Commands:\n- STATUS: Check firewall & threat level\n- SCAN: Run network port vulnerability check\n- IPCONFIG: Display network interface details\n- PING: Test connection to secure gateway\n- LOCKDOWN: Trigger emergency network lockdown\n- CLEAR: Clear terminal screen")
             elif cmd_upper == "STATUS":
                 st.session_state.terminal_history.append("FIREWALL: ACTIVE | ENCRYPTION: SECURE | THREAT LEVEL: LOW")
             elif cmd_upper == "SCAN":
                 st.session_state.terminal_history.append("Scanning network ports... [Ports 21, 22, 80, 443 active]. No intrusion detected.")
             elif cmd_upper == "IPCONFIG":
                 st.session_state.terminal_history.append("IPv4 Address: 192.168.1.100 | Gateway: 192.168.1.1 | Subnet: 255.255.255.0")
+            elif cmd_upper == "PING":
+                st.session_state.terminal_history.append("Pinging 192.168.1.1 with 32 bytes of data:\nReply from 192.168.1.1: bytes=32 time=1ms TTL=64\nPing statistics: Packets: Sent = 1, Received = 1, Lost = 0 (0% loss)")
+            elif cmd_upper == "LOCKDOWN":
+                st.session_state.sos_triggered = True
+                st.session_state.terminal_history.append("⚠️ EMERGENCY LOCKDOWN ACTIVATED! All exterior ports isolated.")
             else:
-                st.session_state.terminal_history.append(f"Command not recognized: '{cmd}'. Type 'status', 'scan', 'ipconfig', or 'clear'.")
+                st.session_state.terminal_history.append(f"Command not recognized: '{cmd}'. Type 'help' for available commands.")
 
     # টার্মিনাল স্ক্রিন রেন্ডার
     terminal_output = "\n".join(st.session_state.terminal_history)
