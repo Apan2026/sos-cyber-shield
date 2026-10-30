@@ -91,7 +91,9 @@ div[data-testid="stMetric"] label {
 
 defaults = {
     "sos_triggered": False,
-    "admin_logged_in": False,   # অ্যাডমিন লগইন স্টেট
+    "logged_in": False,
+    "logged_in_user": "",
+    "registered_users": {"admin": "root123"},  # ডিফল্ট অ্যাডমিন অ্যাকাউন্ট
     "terminal_history": ["System initialized... Type commands or select options."],
     "incident_logs": [
         {"Time": "2026-03-30 10:15:22", "Type": "Brute Force Attack", "IP": "192.168.1.45", "Status": "Blocked"},
@@ -113,28 +115,47 @@ st.markdown('<div class="sos-subtitle">SECURE OPERATIONS & GLOBAL THREAT INTELLI
 st.divider()
 
 # ==========================================
-# SIDEBAR (Admin Login & Navigation)
+# SIDEBAR (Auth & Navigation)
 # ==========================================
 
 st.sidebar.markdown("## 🛡️ SYSTEM MENU")
 
-# অ্যাডমিন লগইন সেকশন
-st.sidebar.markdown("### 🔐 ADMIN AUTHENTICATION")
-admin_user = st.sidebar.text_input("Username", value="")
-admin_pass = st.sidebar.text_input("Password", type="password", value="")
-
-if st.sidebar.button("Login as Admin"):
-    # ডিফল্ট ইউজারনেম: admin, পাসওয়ার্ড: root123
-    if admin_user == "admin" and admin_pass == "root123":
-        st.session_state.admin_logged_in = True
-        st.sidebar.success("Access Granted! Hacker Terminal Unlocked.")
+if not st.session_state.logged_in:
+    auth_mode = st.sidebar.radio("Authentication", ["Login", "Register"])
+    
+    if auth_mode == "Login":
+        st.sidebar.markdown("### 🔐 USER / ADMIN LOGIN")
+        login_user = st.sidebar.text_input("Username", key="login_user")
+        login_pass = st.sidebar.text_input("Password", type="password", key="login_pass")
+        
+        if st.sidebar.button("Login"):
+            users = st.session_state.registered_users
+            if login_user in users and users[login_user] == login_pass:
+                st.session_state.logged_in = True
+                st.session_state.logged_in_user = login_user
+                st.sidebar.success(f"Welcome back, {login_user}!")
+                st.rerun()
+            else:
+                st.sidebar.error("Invalid Username or Password!")
+                
     else:
-        st.sidebar.error("Access Denied! Invalid Credentials.")
-
-if st.session_state.admin_logged_in:
-    st.sidebar.markdown("---")
-    if st.sidebar.button("Logout Admin"):
-        st.session_state.admin_logged_in = False
+        st.sidebar.markdown("### 📝 NEW USER REGISTRATION")
+        reg_user = st.sidebar.text_input("Choose Username", key="reg_user")
+        reg_pass = st.sidebar.text_input("Choose Password", type="password", key="reg_pass")
+        
+        if st.sidebar.button("Register Account"):
+            if not reg_user or not reg_pass:
+                st.sidebar.warning("Please fill in all fields.")
+            elif reg_user in st.session_state.registered_users:
+                st.sidebar.error("Username already exists!")
+            else:
+                st.session_state.registered_users[reg_user] = reg_pass
+                st.sidebar.success("Registration successful! Please switch to Login.")
+else:
+    st.sidebar.success(f"Logged in as: **{st.session_state.logged_in_user}**")
+    if st.sidebar.button("Logout"):
+        st.session_state.logged_in = False
+        st.session_state.logged_in_user = ""
         st.rerun()
 
 st.sidebar.divider()
@@ -148,8 +169,8 @@ nav_options = [
     "System Info"
 ]
 
-if st.session_state.admin_logged_in:
-    nav_options.append("💻 Hacker Terminal (Admin)")
+if st.session_state.logged_in:
+    nav_options.append("💻 Hacker Terminal")
 
 page = st.sidebar.radio("NAVIGATION", nav_options)
 
@@ -271,21 +292,21 @@ elif page == "System Info":
     """)
 
 # ==========================================
-# PAGE 6: HACKER TERMINAL (ADMIN ONLY)
+# PAGE 6: HACKER TERMINAL (LOGGED IN ONLY)
 # ==========================================
 
-elif page == "💻 Hacker Terminal (Admin)":
-    st.subheader("💻 SECURE ADMIN HACKER TERMINAL")
-    st.success("Logged in as Root Admin. Full system shell access granted.")
+elif page == "💻 Hacker Terminal":
+    st.subheader("💻 SECURE HACKER TERMINAL")
+    st.success(f"Logged in as: **{st.session_state.logged_in_user}**. Full system shell access granted.")
 
     # কমান্ড ইনপুট ফর্ম
     with st.form("terminal_form", clear_on_submit=True):
-        cmd = st.text_input("root@sos-shield:~#", placeholder="Type command (e.g. scan, status, ipconfig, clear)")
+        cmd = st.text_input(f"{st.session_state.logged_in_user}@sos-shield:~#", placeholder="Type command (e.g. scan, status, ipconfig, clear)")
         submitted = st.form_submit_button("Execute Command")
 
         if submitted and cmd:
             cmd_upper = cmd.strip().upper()
-            st.session_state.terminal_history.append(f"root@sos-shield:~# {cmd}")
+            st.session_state.terminal_history.append(f"{st.session_state.logged_in_user}@sos-shield:~# {cmd}")
             
             if cmd_upper == "CLEAR":
                 st.session_state.terminal_history = ["Terminal cleared."]
