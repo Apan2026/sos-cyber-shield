@@ -81,6 +81,7 @@ div[data-testid="stMetric"] label {
     border: 1px solid #00ff66;
     font-family: monospace;
     font-size: 14px;
+    white-space: pre-wrap;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -94,7 +95,7 @@ defaults = {
     "logged_in": False,
     "logged_in_user": "",
     "registered_users": {"admin": "root123"},  # ডিফল্ট অ্যাডমিন অ্যাকাউন্ট
-    "terminal_history": ["System initialized... Type 'help' for available commands."],
+    "terminal_history": ["System initialized... Unlimited shell mode ready. Type 'help' for info."],
     "incident_logs": [
         {"Time": "2026-03-30 10:15:22", "Type": "Brute Force Attack", "IP": "192.168.1.45", "Status": "Blocked"},
         {"Time": "2026-03-30 10:12:05", "Type": "SQL Injection", "IP": "45.33.22.11", "Status": "Mitigated"},
@@ -292,39 +293,39 @@ elif page == "System Info":
     """)
 
 # ==========================================
-# PAGE 6: HACKER TERMINAL (LOGGED IN ONLY)
+# PAGE 6: HACKER TERMINAL (UNLIMITED SHELL)
 # ==========================================
 
 elif page == "💻 Hacker Terminal":
-    st.subheader("💻 SECURE HACKER TERMINAL")
-    st.success(f"Logged in as: **{st.session_state.logged_in_user}**. Full system shell access granted.")
+    st.subheader("💻 SECURE HACKER TERMINAL [UNLIMITED SHELL]")
+    st.success(f"Logged in as: **{st.session_state.logged_in_user}**. Unlimited command execution enabled.")
 
     # কমান্ড ইনপুট ফর্ম
     with st.form("terminal_form", clear_on_submit=True):
-        cmd = st.text_input(f"{st.session_state.logged_in_user}@sos-shield:~#", placeholder="Type command (e.g. help, scan, ping, status, clear)")
+        cmd = st.text_input(f"{st.session_state.logged_in_user}@sos-shield:~#", placeholder="Type any command (e.g. nmap, python script.py, status, clear)")
         submitted = st.form_submit_button("Execute Command")
 
         if submitted and cmd:
-            cmd_upper = cmd.strip().upper()
-            st.session_state.terminal_history.append(f"{st.session_state.logged_in_user}@sos-shield:~# {cmd}")
+            cmd_clean = cmd.strip()
+            cmd_upper = cmd_clean.upper()
+            st.session_state.terminal_history.append(f"{st.session_state.logged_in_user}@sos-shield:~# {cmd_clean}")
             
             if cmd_upper == "CLEAR":
-                st.session_state.terminal_history = ["Terminal cleared."]
+                st.session_state.terminal_history = ["Terminal cleared. Ready for custom commands."]
             elif cmd_upper == "HELP":
-                st.session_state.terminal_history.append("Available Commands:\n- STATUS: Check firewall & threat level\n- SCAN: Run network port vulnerability check\n- IPCONFIG: Display network interface details\n- PING: Test connection to secure gateway\n- LOCKDOWN: Trigger emergency network lockdown\n- CLEAR: Clear terminal screen")
-            elif cmd_upper == "STATUS":
-                st.session_state.terminal_history.append("FIREWALL: ACTIVE | ENCRYPTION: SECURE | THREAT LEVEL: LOW")
-            elif cmd_upper == "SCAN":
-                st.session_state.terminal_history.append("Scanning network ports... [Ports 21, 22, 80, 443 active]. No intrusion detected.")
-            elif cmd_upper == "IPCONFIG":
-                st.session_state.terminal_history.append("IPv4 Address: 192.168.1.100 | Gateway: 192.168.1.1 | Subnet: 255.255.255.0")
-            elif cmd_upper == "PING":
-                st.session_state.terminal_history.append("Pinging 192.168.1.1 with 32 bytes of data:\nReply from 192.168.1.1: bytes=32 time=1ms TTL=64\nPing statistics: Packets: Sent = 1, Received = 1, Lost = 0 (0% loss)")
-            elif cmd_upper == "LOCKDOWN":
-                st.session_state.sos_triggered = True
-                st.session_state.terminal_history.append("⚠️ EMERGENCY LOCKDOWN ACTIVATED! All exterior ports isolated.")
+                st.session_state.terminal_history.append("UNLIMITED SHELL MODE: You can type ANY command or tool name. Every input is processed dynamically.")
             else:
-                st.session_state.terminal_history.append(f"Command not recognized: '{cmd}'. Type 'help' for available commands.")
+                # ডাইনামিক বা আনলিমিটেড কমান্ড প্রসেসর
+                parts = cmd_clean.split(" ")
+                base_cmd = parts[0].lower()
+                target = parts[1] if len(parts) > 1 else "target-system"
+                
+                dynamic_response = f"[+] Executing process: '{base_cmd}'\n"
+                dynamic_response += f"[*] Target resolved: {target}\n"
+                dynamic_response += f"[*] Bypassing security filters... Success.\n"
+                dynamic_response += f"[⚡] Shell Output: Command '{cmd_clean}' processed successfully with status code 0."
+                
+                st.session_state.terminal_history.append(dynamic_response)
 
     # টার্মিনাল স্ক্রিন রেন্ডার
     terminal_output = "\n".join(st.session_state.terminal_history)
