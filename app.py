@@ -15,7 +15,7 @@ st.set_page_config(
 )
 
 # ==========================================
-# DESIGN & STYLING (Hacker Dashboard Theme)
+# DESIGN & STYLING (Hacker Terminal Theme)
 # ==========================================
 
 st.markdown("""
@@ -73,6 +73,15 @@ div[data-testid="stMetric"] label {
     letter-spacing: 2px;
     font-family: monospace;
 }
+.terminal-box {
+    background: #000000;
+    color: #00ff66;
+    padding: 15px;
+    border-radius: 5px;
+    border: 1px solid #00ff66;
+    font-family: monospace;
+    font-size: 14px;
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -82,6 +91,8 @@ div[data-testid="stMetric"] label {
 
 defaults = {
     "sos_triggered": False,
+    "admin_logged_in": False,   # অ্যাডমিন লগইন স্টেট
+    "terminal_history": ["System initialized... Type commands or select options."],
     "incident_logs": [
         {"Time": "2026-03-30 10:15:22", "Type": "Brute Force Attack", "IP": "192.168.1.45", "Status": "Blocked"},
         {"Time": "2026-03-30 10:12:05", "Type": "SQL Injection", "IP": "45.33.22.11", "Status": "Mitigated"},
@@ -102,21 +113,45 @@ st.markdown('<div class="sos-subtitle">SECURE OPERATIONS & GLOBAL THREAT INTELLI
 st.divider()
 
 # ==========================================
-# SIDEBAR NAVIGATION
+# SIDEBAR (Admin Login & Navigation)
 # ==========================================
 
 st.sidebar.markdown("## 🛡️ SYSTEM MENU")
 
-page = st.sidebar.radio(
-    "NAVIGATION",
-    [
-        "Dashboard Overview",
-        "Threat Map & Analytics",
-        "Security Log Analyzer",
-        "Incident Playbook",
-        "System Info"
-    ]
-)
+# অ্যাডমিন লগইন সেকশন
+st.sidebar.markdown("### 🔐 ADMIN AUTHENTICATION")
+admin_user = st.sidebar.text_input("Username", value="")
+admin_pass = st.sidebar.text_input("Password", type="password", value="")
+
+if st.sidebar.button("Login as Admin"):
+    # ডিফল্ট ইউজারনেম: admin, পাসওয়ার্ড: root123
+    if admin_user == "admin" and admin_pass == "root123":
+        st.session_state.admin_logged_in = True
+        st.sidebar.success("Access Granted! Hacker Terminal Unlocked.")
+    else:
+        st.sidebar.error("Access Denied! Invalid Credentials.")
+
+if st.session_state.admin_logged_in:
+    st.sidebar.markdown("---")
+    if st.sidebar.button("Logout Admin"):
+        st.session_state.admin_logged_in = False
+        st.rerun()
+
+st.sidebar.divider()
+
+# মেনু অপশন
+nav_options = [
+    "Dashboard Overview",
+    "Threat Map & Analytics",
+    "Security Log Analyzer",
+    "Incident Playbook",
+    "System Info"
+]
+
+if st.session_state.admin_logged_in:
+    nav_options.append("💻 Hacker Terminal (Admin)")
+
+page = st.sidebar.radio("NAVIGATION", nav_options)
 
 st.sidebar.divider()
 st.sidebar.markdown("### SYSTEM STATUS")
@@ -162,7 +197,6 @@ elif page == "Threat Map & Analytics":
     st.subheader("🌍 GLOBAL ATTACK MAP & TELEMETRY")
     st.info("Visualizing global threat vectors and malicious IP origins in real-time.")
 
-    # ডামি অ্যাটাক ডেটা (ছবির ম্যাপের সাথে সামঞ্জস্যপূর্ণ)
     attack_data = pd.DataFrame([
         {"Latitude": 37.7749, "Longitude": -122.4194, "City": "San Francisco", "Attempts": 180, "Threat": "DDoS"},
         {"Latitude": 51.5074, "Longitude": -0.1278, "City": "London", "Attempts": 120, "Threat": "Brute Force"},
@@ -183,7 +217,7 @@ elif page == "Threat Map & Analytics":
     )
 
     fig.update_layout(
-        map_style="carto-darkmatter",  # হ্যাকার লুকের জন্য ডার্ক ম্যাপ স্টাইল
+        map_style="carto-darkmatter",
         paper_bgcolor="#050b10",
         font_color="#00ff66",
         margin=dict(l=0, r=0, t=0, b=0)
@@ -235,6 +269,38 @@ elif page == "System Info":
     **Framework:** Streamlit & Plotly  
     **Design Theme:** Cyberpunk Dark / Terminal HUD  
     """)
+
+# ==========================================
+# PAGE 6: HACKER TERMINAL (ADMIN ONLY)
+# ==========================================
+
+elif page == "💻 Hacker Terminal (Admin)":
+    st.subheader("💻 SECURE ADMIN HACKER TERMINAL")
+    st.success("Logged in as Root Admin. Full system shell access granted.")
+
+    # কমান্ড ইনপুট ফর্ম
+    with st.form("terminal_form", clear_on_submit=True):
+        cmd = st.text_input("root@sos-shield:~#", placeholder="Type command (e.g. scan, status, ipconfig, clear)")
+        submitted = st.form_submit_button("Execute Command")
+
+        if submitted and cmd:
+            cmd_upper = cmd.strip().upper()
+            st.session_state.terminal_history.append(f"root@sos-shield:~# {cmd}")
+            
+            if cmd_upper == "CLEAR":
+                st.session_state.terminal_history = ["Terminal cleared."]
+            elif cmd_upper == "STATUS":
+                st.session_state.terminal_history.append("FIREWALL: ACTIVE | ENCRYPTION: SECURE | THREAT LEVEL: LOW")
+            elif cmd_upper == "SCAN":
+                st.session_state.terminal_history.append("Scanning network ports... [Ports 21, 22, 80, 443 active]. No intrusion detected.")
+            elif cmd_upper == "IPCONFIG":
+                st.session_state.terminal_history.append("IPv4 Address: 192.168.1.100 | Gateway: 192.168.1.1 | Subnet: 255.255.255.0")
+            else:
+                st.session_state.terminal_history.append(f"Command not recognized: '{cmd}'. Type 'status', 'scan', 'ipconfig', or 'clear'.")
+
+    # টার্মিনাল স্ক্রিন রেন্ডার
+    terminal_output = "\n".join(st.session_state.terminal_history)
+    st.markdown(f'<div class="terminal-box">{terminal_output}</div>', unsafe_allow_html=True)
 
 # ==========================================
 # FOOTER
