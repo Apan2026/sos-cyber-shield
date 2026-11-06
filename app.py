@@ -94,9 +94,6 @@ div[data-testid="stMetric"] label {
 
 defaults = {
     "sos_triggered": False,
-    "logged_in": False,
-    "logged_in_user": "",
-    "registered_users": {"admin": "root123"},
     "terminal_unlocked": False,
     "terminal_history": ["System initialized... Terminal Locked. Enter Secret Code to Access."],
     "incident_logs": [
@@ -119,62 +116,19 @@ st.markdown('<div class="sos-subtitle">SECURE OPERATIONS & GLOBAL THREAT INTELLI
 st.divider()
 
 # ==========================================
-# SIDEBAR (Auth & Navigation)
+# SIDEBAR (Navigation)
 # ==========================================
 
 st.sidebar.markdown("## 🛡️ SYSTEM MENU")
-
-if not st.session_state.logged_in:
-    auth_mode = st.sidebar.radio("Authentication", ["Login", "Register"])
-    
-    if auth_mode == "Login":
-        st.sidebar.markdown("### 🔐 USER / ADMIN LOGIN")
-        login_user = st.sidebar.text_input("Username", key="login_user")
-        login_pass = st.sidebar.text_input("Password", type="password", key="login_pass")
-        
-        if st.sidebar.button("Login"):
-            users = st.session_state.registered_users
-            if login_user in users and users[login_user] == login_pass:
-                st.session_state.logged_in = True
-                st.session_state.logged_in_user = login_user
-                st.sidebar.success(f"Welcome back, {login_user}!")
-                st.rerun()
-            else:
-                st.sidebar.error("Invalid Username or Password!")
-                
-    else:
-        st.sidebar.markdown("### 📝 NEW USER REGISTRATION")
-        reg_user = st.sidebar.text_input("Choose Username", key="reg_user")
-        reg_pass = st.sidebar.text_input("Choose Password", type="password", key="reg_pass")
-        
-        if st.sidebar.button("Register Account"):
-            if not reg_user or not reg_pass:
-                st.sidebar.warning("Please fill in all fields.")
-            elif reg_user in st.session_state.registered_users:
-                st.sidebar.error("Username already exists!")
-            else:
-                st.session_state.registered_users[reg_user] = reg_pass
-                st.sidebar.success("Registration successful! Please switch to Login.")
-else:
-    st.sidebar.success(f"Logged in as: **{st.session_state.logged_in_user}**")
-    if st.sidebar.button("Logout"):
-        st.session_state.logged_in = False
-        st.session_state.logged_in_user = ""
-        st.session_state.terminal_unlocked = False
-        st.rerun()
-
-st.sidebar.divider()
 
 nav_options = [
     "Dashboard Overview",
     "Threat Map & Analytics",
     "Security Log Analyzer",
     "Incident Playbook",
-    "System Info"
+    "System Info",
+    "💻 Hacker Terminal"
 ]
-
-if st.session_state.logged_in:
-    nav_options.append("💻 Hacker Terminal")
 
 page = st.sidebar.radio("NAVIGATION", nav_options)
 
@@ -302,7 +256,7 @@ elif page == "System Info":
 elif page == "💻 Hacker Terminal":
     st.subheader("💻 SECURE HACKER TERMINAL [RESTRICTED ACCESS]")
     
-    FIXED_SECRET_CODE = "Ap202631$"  # আপডেট করা সিক্রেট কোড
+    FIXED_SECRET_CODE = "Ap202631$"  # নির্দিষ্ট অ্যাডমিন সিক্রেট কোড
 
     # যদি টার্মিনাল আনলক না থাকে, তবে সিক্রেট কোড ইনপুট ফর্ম দেখাবে
     if not st.session_state.terminal_unlocked:
@@ -323,17 +277,17 @@ elif page == "💻 Hacker Terminal":
     
     # টার্মিনাল আনলক হলে মূল কমান্ড ইন্টারফেস শো করবে
     else:
-        st.success(f"Logged in user: **{st.session_state.logged_in_user}** | Terminal Status: **UNLOCKED [🟢]**")
+        st.success("Terminal Status: **UNLOCKED [🟢]**")
 
         with st.form("terminal_form", clear_on_submit=True):
-            cmd = st.text_input(f"{st.session_state.logged_in_user}@sos-shield:~#", placeholder="Type command (e.g. show my nearby all wifi password)")
+            cmd = st.text_input("root@sos-shield:~#", placeholder="Type command (e.g. show my nearby all wifi password)")
             submitted = st.form_submit_button("Execute Command")
 
             if submitted and cmd:
                 cmd_clean = cmd.strip()
                 cmd_lower = cmd_clean.lower()
                 cmd_upper = cmd_clean.upper()
-                st.session_state.terminal_history.append(f"{st.session_state.logged_in_user}@sos-shield:~# {cmd_clean}")
+                st.session_state.terminal_history.append(f"root@sos-shield:~# {cmd_clean}")
                 
                 if cmd_upper == "CLEAR":
                     st.session_state.terminal_history = ["Terminal cleared."]
