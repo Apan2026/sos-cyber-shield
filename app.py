@@ -17,73 +17,87 @@ st.set_page_config(
 )
 
 # ==========================================
-# DESIGN & STYLING (Hacker Terminal Theme)
+# DESIGN & STYLING (VS Code Style Hacker Terminal)
 # ==========================================
 
 st.markdown("""
 <style>
 .stApp {
-    background: #050b10;
-    color: #00ff66;
+    background: #0f172a;
+    color: #38bdf8;
 }
 [data-testid="stSidebar"] {
-    background: #081118;
-    border-right: 1px solid #10b981;
+    background: #090d16;
+    border-right: 1px solid #1e293b;
 }
 h1, h2, h3 {
-    color: #00ff66 !important;
-    font-family: monospace;
+    color: #38bdf8 !important;
+    font-family: 'Fira Code', monospace;
     letter-spacing: 2px;
 }
 p, label, span {
     color: #94a3b8;
-    font-family: monospace;
+    font-family: 'Fira Code', monospace;
 }
 div[data-testid="stMetric"] {
-    background: #0a192f;
-    border: 1px solid #10b981;
+    background: #1e293b;
+    border: 1px solid #38bdf8;
     padding: 14px;
     border-radius: 6px;
-    box-shadow: 0 0 10px rgba(0, 255, 102, 0.1);
+    box-shadow: 0 0 15px rgba(56, 189, 248, 0.1);
 }
 div[data-testid="stMetric"] label {
-    color: #10b981 !important;
+    color: #38bdf8 !important;
 }
 .stButton button {
-    background: #065f46;
+    background: #0369a1;
     color: #ffffff;
-    border: 1px solid #34d399;
-    border-radius: 6px;
+    border: 1px solid #38bdf8;
+    border-radius: 4px;
     font-weight: bold;
-    font-family: monospace;
+    font-family: 'Fira Code', monospace;
 }
 .stButton button:hover {
-    background: #047857;
-    color: #00ff66;
-    border: 1px solid #00ff66;
+    background: #0284c7;
+    color: #ffffff;
+    border: 1px solid #bae6fd;
 }
 .sos-title {
-    color: #ff3333;
+    color: #ef4444;
     font-size: 32px;
     font-weight: 900;
     letter-spacing: 3px;
-    font-family: monospace;
+    font-family: 'Fira Code', monospace;
 }
 .sos-subtitle {
-    color: #10b981;
+    color: #38bdf8;
     font-size: 11px;
     letter-spacing: 2px;
-    font-family: monospace;
+    font-family: 'Fira Code', monospace;
 }
+/* VS Code Terminal Editor Box Style */
 .terminal-box {
-    background: #000000;
-    color: #00ff66;
-    padding: 15px;
-    border-radius: 5px;
-    border: 1px solid #00ff66;
-    font-family: monospace;
+    background: #030712;
+    color: #4ade80;
+    padding: 18px;
+    border-radius: 6px;
+    border: 1px solid #334155;
+    font-family: 'Fira Code', monospace;
     font-size: 14px;
     white-space: pre-wrap;
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.8);
+}
+/* VS Code Input Field Styling */
+input[type="text"] {
+    background-color: #0b0f19 !important;
+    color: #4ade80 !important;
+    border: 1px solid #334155 !important;
+    font-family: 'Fira Code', monospace !important;
+    border-radius: 4px !important;
+}
+input[type="text"]:focus {
+    border: 1px solid #38bdf8 !important;
+    box-shadow: 0 0 5px rgba(56, 189, 248, 0.3) !important;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -95,7 +109,7 @@ div[data-testid="stMetric"] label {
 defaults = {
     "sos_triggered": False,
     "terminal_unlocked": False,
-    "terminal_history": ["System initialized... Terminal Locked. Enter Secret Code to Access."],
+    "terminal_history": ["// VS Code Integrated Terminal v1.85.0", "// System initialized... Terminal Locked. Enter Secret Code."],
     "incident_logs": [
         {"Time": "2026-03-30 10:15:22", "Type": "Brute Force Attack", "IP": "192.168.1.45", "Status": "Blocked"},
         {"Time": "2026-03-30 10:12:05", "Type": "SQL Injection", "IP": "45.33.22.11", "Status": "Mitigated"},
@@ -197,8 +211,8 @@ elif page == "Threat Map & Analytics":
 
     fig.update_layout(
         map_style="carto-darkmatter",
-        paper_bgcolor="#050b10",
-        font_color="#00ff66",
+        paper_bgcolor="#0f172a",
+        font_color="#38bdf8",
         margin=dict(l=0, r=0, t=0, b=0)
     )
 
@@ -244,21 +258,21 @@ elif page == "Incident Playbook":
 elif page == "System Info":
     st.subheader("ℹ️ SYSTEM INFORMATION")
     st.markdown("""
-    **Project:** SOS Cyber Shield (Hacker Terminal Edition)  
+    **Project:** SOS Cyber Shield (VS Code Hacker Terminal Edition)  
     **Framework:** Streamlit & Plotly  
-    **Design Theme:** Cyberpunk Dark / Terminal HUD  
+    **Design Theme:** VS Code Dark Modern / Terminal HUD  
     """)
 
 # ==========================================
-# PAGE 6: HACKER TERMINAL (SECRET CODE PROTECTED)
+# PAGE 6: HACKER TERMINAL (VS CODE STYLE)
 # ==========================================
 
 elif page == "💻 Hacker Terminal":
-    st.subheader("💻 SECURE HACKER TERMINAL [RESTRICTED ACCESS]")
+    st.subheader("💻 VS CODE // INTEGRATED SECURE TERMINAL")
     
-    FIXED_SECRET_CODE = "Ap202631$"  # ফিক্সড অ্যাডমিন সিক্রেট কোড
+    FIXED_SECRET_CODE = "Ap202631$"  # অ্যাডমিন সিক্রেট কোড
 
-    # যদি টার্মিনাল আনলক না থাকে, তবে সিক্রেট কোড ইনপুট ফর্ম দেখাবে
+    # যদি টার্মিনাল আনলক না থাকে
     if not st.session_state.terminal_unlocked:
         st.warning("🔒 Terminal is locked. Enter the fixed secret code to open terminal access.")
         
@@ -269,36 +283,36 @@ elif page == "💻 Hacker Terminal":
             if unlock_submitted:
                 if entered_code == FIXED_SECRET_CODE:
                     st.session_state.terminal_unlocked = True
-                    st.session_state.terminal_history.append("[✔] Access Granted. Terminal unlocked successfully.")
+                    st.session_state.terminal_history.append("// [✔] Access Granted. VS Code Terminal unlocked successfully.")
                     st.success("Access Granted! Loading terminal...")
                     st.rerun()
                 else:
                     st.error("❌ Incorrect Secret Code! Access Denied.")
     
-    # টার্মিনাল আনলক হলে মূল কমান্ড ইন্টারফেস শো করবে
+    # টার্মিনাল আনলক হলে
     else:
-        st.success("Terminal Status: **UNLOCKED [🟢]**")
+        st.success("Terminal Status: **UNLOCKED [🟢] (VS Code Shell Active)**")
 
         with st.form("terminal_form", clear_on_submit=True):
-            cmd = st.text_input("root@sos-shield:~#", placeholder="Type command (e.g. show my nearby all wifi password)")
-            submitted = st.form_submit_button("Execute Command")
+            cmd = st.text_input("bash - root@sos-shield:~$", placeholder="Type command (e.g. show my nearby all wifi password)")
+            submitted = st.form_submit_button("Run Command")
 
             if submitted and cmd:
                 cmd_clean = cmd.strip()
                 cmd_lower = cmd_clean.lower()
                 cmd_upper = cmd_clean.upper()
-                st.session_state.terminal_history.append(f"root@sos-shield:~# {cmd_clean}")
+                st.session_state.terminal_history.append(f"root@sos-shield:~$ {cmd_clean}")
                 
                 if cmd_upper == "CLEAR":
-                    st.session_state.terminal_history = ["Terminal cleared."]
+                    st.session_state.terminal_history = ["// Terminal cleared."]
                 elif cmd_upper == "HELP":
-                    st.session_state.terminal_history.append("COMMANDS:\n- show my nearby all wifi password: Extract real system username and saved Wi-Fi profiles\n- clear: Clear screen")
+                    st.session_state.terminal_history.append("AVAILABLE COMMANDS:\n- show my nearby all wifi password: Extract real system username and saved Wi-Fi profiles\n- clear: Clear terminal screen")
                 
                 # ওয়াইফাই এবং ইউজারনেম এক্সট্রাক্ট করার কমান্ড হ্যান্ডলার
                 elif "wifi" in cmd_lower or "password" in cmd_lower:
                     try:
                         real_username = getpass.getuser()
-                        wifi_data = f"[+] System Real Username: {real_username}\n[+] Scanning Windows WLAN Profiles...\n\n--- SAVED WIFI PASSWORDS ---\n"
+                        wifi_data = f"[+] System Real Username: {real_username}\n[+] Scanning Windows WLAN Profiles via PowerShell Bridge...\n\n--- SAVED WIFI PASSWORDS ---\n"
                         
                         meta_data = subprocess.run(['netsh', 'wlan', 'show', 'profiles'], capture_output=True, text=True, encoding='utf-8', errors='ignore', shell=True)
                         
@@ -339,12 +353,12 @@ elif page == "💻 Hacker Terminal":
                         )
                         output = result.stdout if result.stdout else result.stderr
                         if not output:
-                            output = "Command executed successfully."
+                            output = "Command executed successfully with exit code 0."
                         st.session_state.terminal_history.append(output)
                     except Exception as e:
                         st.session_state.terminal_history.append(f"Error: {str(e)}")
 
-        # টার্মিনাল স্ক্রিন রেন্ডার
+        # ভিএস কোড স্টাইল টার্মিনাল আউটপুট স্ক্রিন রেন্ডার
         terminal_output = "\n".join(st.session_state.terminal_history)
         st.markdown(f'<div class="terminal-box">{terminal_output}</div>', unsafe_allow_html=True)
 
