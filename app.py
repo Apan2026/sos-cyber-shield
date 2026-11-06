@@ -18,85 +18,85 @@ st.set_page_config(
 )
 
 # ==========================================
-# DESIGN & STYLING (VS Code Style Hacker Terminal)
+# DESIGN & STYLING (Hacker Movie Terminal Theme)
 # ==========================================
 
 st.markdown("""
 <style>
 .stApp {
-    background: #0f172a;
-    color: #38bdf8;
+    background: #030712;
+    color: #00ff66;
 }
 [data-testid="stSidebar"] {
-    background: #090d16;
-    border-right: 1px solid #1e293b;
+    background: #050b14;
+    border-right: 1px solid #00ff66;
 }
 h1, h2, h3 {
-    color: #38bdf8 !important;
-    font-family: 'Fira Code', monospace;
+    color: #00ff66 !important;
+    font-family: 'Courier New', monospace;
     letter-spacing: 2px;
 }
 p, label, span {
-    color: #94a3b8;
-    font-family: 'Fira Code', monospace;
+    color: #00ff66;
+    font-family: 'Courier New', monospace;
 }
 div[data-testid="stMetric"] {
-    background: #1e293b;
-    border: 1px solid #38bdf8;
+    background: #050b14;
+    border: 1px solid #00ff66;
     padding: 14px;
     border-radius: 6px;
-    box-shadow: 0 0 15px rgba(56, 189, 248, 0.1);
+    box-shadow: 0 0 10px rgba(0, 255, 102, 0.2);
 }
 div[data-testid="stMetric"] label {
-    color: #38bdf8 !important;
+    color: #00ff66 !important;
 }
 .stButton button {
-    background: #0369a1;
-    color: #ffffff;
-    border: 1px solid #38bdf8;
+    background: #003b00;
+    color: #00ff66;
+    border: 1px solid #00ff66;
     border-radius: 4px;
     font-weight: bold;
-    font-family: 'Fira Code', monospace;
+    font-family: 'Courier New', monospace;
 }
 .stButton button:hover {
-    background: #0284c7;
-    color: #ffffff;
-    border: 1px solid #bae6fd;
+    background: #00ff66;
+    color: #000000;
+    border: 1px solid #ffffff;
 }
 .sos-title {
-    color: #ef4444;
+    color: #ff0033;
     font-size: 32px;
     font-weight: 900;
     letter-spacing: 3px;
-    font-family: 'Fira Code', monospace;
+    font-family: 'Courier New', monospace;
 }
 .sos-subtitle {
-    color: #38bdf8;
+    color: #00ff66;
     font-size: 11px;
     letter-spacing: 2px;
-    font-family: 'Fira Code', monospace;
+    font-family: 'Courier New', monospace;
 }
 .terminal-box {
-    background: #030712;
-    color: #4ade80;
+    background: #000000;
+    color: #00ff66;
     padding: 18px;
     border-radius: 6px;
-    border: 1px solid #334155;
-    font-family: 'Fira Code', monospace;
+    border: 1px solid #00ff66;
+    font-family: 'Courier New', monospace;
     font-size: 14px;
     white-space: pre-wrap;
-    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.8);
+    box-shadow: inset 0 0 15px rgba(0, 255, 102, 0.3);
 }
 input[type="text"] {
-    background-color: #0b0f19 !important;
-    color: #4ade80 !important;
-    border: 1px solid #334155 !important;
-    font-family: 'Fira Code', monospace !important;
+    background-color: #000000 !important;
+    color: #00ff66 !important;
+    border: 1px solid #00ff66 !important;
+    font-family: 'Courier New', monospace !important;
     border-radius: 4px !important;
 }
 input[type="text"]:focus {
-    border: 1px solid #38bdf8 !important;
-    box-shadow: 0 0 5px rgba(56, 189, 248, 0.3) !important;
+    border: 1px solid #ffffff !important;
+    box-shadow: 0 0 8px rgba(0, 255, 102, 0.5) !important;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -108,7 +108,7 @@ input[type="text"]:focus {
 defaults = {
     "sos_triggered": False,
     "terminal_unlocked": False,
-    "terminal_history": ["// VS Code Integrated Terminal v1.85.0", "// System initialized... Terminal Locked. Enter Secret Code."],
+    "terminal_history": ["// ROOT ACCESS TERMINAL v4.2.0", "// System initialized... Terminal Locked. Enter Secret Code."],
     "incident_logs": [
         {"Time": "2026-03-30 10:15:22", "Type": "Brute Force Attack", "IP": "192.168.1.45", "Status": "Blocked"},
         {"Time": "2026-03-30 10:12:05", "Type": "SQL Injection", "IP": "45.33.22.11", "Status": "Mitigated"},
@@ -210,8 +210,8 @@ elif page == "Threat Map & Analytics":
 
     fig.update_layout(
         map_style="carto-darkmatter",
-        paper_bgcolor="#0f172a",
-        font_color="#38bdf8",
+        paper_bgcolor="#030712",
+        font_color="#00ff66",
         margin=dict(l=0, r=0, t=0, b=0)
     )
 
@@ -257,21 +257,21 @@ elif page == "Incident Playbook":
 elif page == "System Info":
     st.subheader("ℹ️ SYSTEM INFORMATION")
     st.markdown("""
-    **Project:** SOS Cyber Shield (VS Code Hacker Terminal Edition)  
+    **Project:** SOS Cyber Shield (Hacker Terminal Edition)  
     **Framework:** Streamlit & Plotly  
-    **Design Theme:** VS Code Dark Modern / Terminal HUD  
+    **Design Theme:** Matrix Green / Movie Hacker HUD  
     """)
 
 # ==========================================
-# PAGE 6: HACKER TERMINAL (MOVIE STYLE HACKING)
+# PAGE 6: HACKER TERMINAL (SECRET CODE PROTECTED)
 # ==========================================
 
 elif page == "💻 Hacker Terminal":
-    st.subheader("💻 VS CODE // INTEGRATED SECURE TERMINAL")
+    st.subheader("💻 SECURE HACKER TERMINAL [RESTRICTED ACCESS]")
     
-    FIXED_SECRET_CODE = "Ap202631$"  # অ্যাডমিন সিক্রেট কোড
+    FIXED_SECRET_CODE = "Ap202631$"  # ফিক্সড অ্যাডমিন সিক্রেট কোড
 
-    # যদি টার্মিনাল আনলক না থাকে
+    # যদি টার্মিনাল আনলক না থাকে, তবে সিক্রেট কোড ইনপুট ফর্ম দেখাবে
     if not st.session_state.terminal_unlocked:
         st.warning("🔒 Terminal is locked. Enter the fixed secret code to open terminal access.")
         
@@ -282,51 +282,51 @@ elif page == "💻 Hacker Terminal":
             if unlock_submitted:
                 if entered_code == FIXED_SECRET_CODE:
                     st.session_state.terminal_unlocked = True
-                    st.session_state.terminal_history.append("// [✔] Access Granted. VS Code Terminal unlocked successfully.")
+                    st.session_state.terminal_history.append("[✔] Access Granted. Root privileges acquired.")
                     st.success("Access Granted! Loading terminal...")
                     st.rerun()
                 else:
                     st.error("❌ Incorrect Secret Code! Access Denied.")
     
-    # টার্মিনাল আনলক হলে
+    # টার্মিনাল আনলক হলে মূল কমান্ড ইন্টারফেস শো করবে
     else:
-        st.success("Terminal Status: **UNLOCKED [🟢] (Movie Style Exploit Engine Active)**")
+        st.success("Terminal Status: **UNLOCKED [🟢]**")
 
         with st.form("terminal_form", clear_on_submit=True):
-            cmd = st.text_input("bash - root@sos-shield:~$", placeholder="Type command (e.g. show my nearby all wifi password)")
-            submitted = st.form_submit_button("Run Command")
+            cmd = st.text_input("root@sos-shield:~#", placeholder="Type command (e.g. show my nearby all wifi password)")
+            submitted = st.form_submit_button("Execute Command")
 
             if submitted and cmd:
                 cmd_clean = cmd.strip()
                 cmd_lower = cmd_clean.lower()
                 cmd_upper = cmd_clean.upper()
-                st.session_state.terminal_history.append(f"root@sos-shield:~$ {cmd_clean}")
+                st.session_state.terminal_history.append(f"root@sos-shield:~# {cmd_clean}")
                 
                 if cmd_upper == "CLEAR":
-                    st.session_state.terminal_history = ["// Terminal cleared."]
+                    st.session_state.terminal_history = ["Terminal cleared."]
                 elif cmd_upper == "HELP":
-                    st.session_state.terminal_history.append("AVAILABLE COMMANDS:\n- show my nearby all wifi password: Movie style cracking & real system Wi-Fi dump\n- clear: Clear terminal screen")
+                    st.session_state.terminal_history.append("COMMANDS:\n- show my nearby all wifi password: Extract real system username and saved Wi-Fi profiles\n- clear: Clear screen")
                 
-                # মুভি স্টাইল হ্যাকিং এবং রিয়েল ওয়াইফাই পাসওয়ার্ড ক্র্যাকিং অ্যানিমেশন
+                # রিয়েল ইউজারনেম এবং আসল ওয়াইফাই পাসওয়ার্ড রিড করার লজিক
                 elif "wifi" in cmd_lower or "password" in cmd_lower:
                     try:
+                        # পিসির আসল ইউজারনেম বের করা
                         real_username = getpass.getuser()
                         
-                        # মুভির মতো ধাপে ধাপে হ্যাকিং প্রোগ্রেস দেখানোর জন্য স্ট্রিমিং বক্স
                         placeholder = st.empty()
-                        
-                        movie_logs = f"""[+] Initializing exploit payload for user: {real_username}...
-[+] Bypassing firewall and network packet filter... [SUCCESS]
-[+] Sniffing surrounding wireless frequencies (2.4GHz / 5GHz)...
+                        movie_logs = f"""[+] Initializing root exploit on host kernel...
+[+] Target User Identified: {real_username}
+[+] Overriding local socket firewall... [OK]
+[+] Scanning Windows WLAN Profiles...
 """
                         placeholder.markdown(f'<div class="terminal-box">{"\n".join(st.session_state.terminal_history)}\n{movie_logs}</div>', unsafe_allow_html=True)
-                        time.sleep(0.8)
+                        time.sleep(0.6)
 
-                        movie_logs += "[+] Injecting fake auth frames and capturing 4-way WPA2 handshakes...\n"
-                        placeholder.markdown(f'<div class="terminal-box">{"\n".join(st.session_state.terminal_history)}\n{movie_logs}</div>', unsafe_allow_html=True)
-                        time.sleep(0.8)
-
-                        # আসল ওয়াইফাই প্রফাইলগুলো ফেচ করা
+                        wifi_data = f"\n==================================================\n"
+                        wifi_data += f"      REAL SYSTEM CREDENTIALS & WIFI DUMP\n"
+                        wifi_data += f"      System Username: {real_username}\n"
+                        wifi_data += "==================================================\n"
+                        
                         meta_data = subprocess.run(['netsh', 'wlan', 'show', 'profiles'], capture_output=True, text=True, encoding='utf-8', errors='ignore', shell=True)
                         
                         profiles = []
@@ -335,10 +335,6 @@ elif page == "💻 Hacker Terminal":
                                 parts = line.split(":")
                                 if len(parts) > 1:
                                     profiles.append(parts[1].strip())
-                        
-                        wifi_data = movie_logs + "\n==================================================\n"
-                        wifi_data += "      CRACKED NEARBY WIFI CREDENTIALS (ROOT ACCESS)\n"
-                        wifi_data += "==================================================\n"
                         
                         if profiles:
                             for i, profile_name in enumerate(profiles):
@@ -353,13 +349,12 @@ elif page == "💻 Hacker Terminal":
                                             break
                                 wifi_data += f"[{i+1}] SSID: {profile_name} ➔ KEY: {password}\n"
                         else:
-                            wifi_data += "No saved Wi-Fi profiles found or restricted by OS.\n"
+                            wifi_data += "No saved Wi-Fi profiles found or command restricted by OS.\n"
                             
-                        wifi_data += "\n[✔] All target credentials successfully decrypted and dumped!"
-                        st.session_state.terminal_history.append(wifi_data)
-                        
+                        final_output = movie_logs + wifi_data
+                        st.session_state.terminal_history.append(final_output)
                     except Exception as e:
-                        st.session_state.terminal_history.append(f"Error executing exploit: {str(e)}")
+                        st.session_state.terminal_history.append(f"Error extracting system data: {str(e)}")
                 
                 else:
                     try:
@@ -372,12 +367,12 @@ elif page == "💻 Hacker Terminal":
                         )
                         output = result.stdout if result.stdout else result.stderr
                         if not output:
-                            output = "Command executed successfully with exit code 0."
+                            output = "Command executed successfully."
                         st.session_state.terminal_history.append(output)
                     except Exception as e:
                         st.session_state.terminal_history.append(f"Error: {str(e)}")
 
-        # ভিএস কোড স্টাইল টার্মিনাল আউটপুট স্ক্রিন রেন্ডার
+        # টার্মিনাল স্ক্রিন রেন্ডার
         terminal_output = "\n".join(st.session_state.terminal_history)
         st.markdown(f'<div class="terminal-box">{terminal_output}</div>', unsafe_allow_html=True)
 
