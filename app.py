@@ -269,108 +269,99 @@ elif page == "System Info":
 elif page == "💻 Hacker Terminal":
     st.subheader("💻 SECURE HACKER TERMINAL [RESTRICTED ACCESS]")
     
-    FIXED_SECRET_CODE = "Ap202631$"  # ফিক্সড অ্যাডমিন সিক্রেট কোড
+    FIXED_SECRET_CODE = "Ap202631$"
 
-    # যদি টার্মিনাল আনলক না থাকে, তবে সিক্রেট কোড ইনপুট ফর্ম দেখাবে
+    # যদি টার্মিনাল আনলক না থাকে
     if not st.session_state.terminal_unlocked:
         st.warning("🔒 Terminal is locked. Enter the fixed secret code to open terminal access.")
         
-        with st.form("unlock_form"):
-            entered_code = st.text_input("Enter Terminal Secret Code", type="password")
-            unlock_submitted = st.form_submit_button("Unlock Terminal")
-            
-            if unlock_submitted:
-                if entered_code == FIXED_SECRET_CODE:
-                    st.session_state.terminal_unlocked = True
-                    st.session_state.terminal_history.append("[✔] Access Granted. Root privileges acquired.")
-                    st.success("Access Granted! Loading terminal...")
-                    st.rerun()
-                else:
-                    st.error("❌ Incorrect Secret Code! Access Denied.")
+        entered_code = st.text_input("Enter Terminal Secret Code", type="password", key="unlock_input")
+        if st.button("Unlock Terminal"):
+            if entered_code == FIXED_SECRET_CODE:
+                st.session_state.terminal_unlocked = True
+                st.session_state.terminal_history.append("[✔] Access Granted. Root privileges acquired.")
+                st.success("Access Granted! Loading terminal...")
+                st.rerun()
+            else:
+                st.error("❌ Incorrect Secret Code! Access Denied.")
     
-    # টার্মিনাল আনলক হলে মূল কমান্ড ইন্টারফেস শো করবে
+    # টার্মিনাল আনলক হলে
     else:
         st.success("Terminal Status: **UNLOCKED [🟢]**")
 
-        with st.form("terminal_form", clear_on_submit=True):
-            cmd = st.text_input("root@sos-shield:~#", placeholder="Type command (e.g. show my nearby all wifi password)")
-            submitted = st.form_submit_button("Execute Command")
+        cmd = st.text_input("root@sos-shield:~#", placeholder="Type command (e.g. show my nearby all wifi password)", key="term_cmd")
+        col_btn1, col_btn2 = st.columns([1, 5])
+        
+        execute_clicked = col_btn1.button("Execute")
+        clear_clicked = col_btn2.button("Clear Screen")
 
-            if submitted and cmd:
-                cmd_clean = cmd.strip()
-                cmd_lower = cmd_clean.lower()
-                cmd_upper = cmd_clean.upper()
-                st.session_state.terminal_history.append(f"root@sos-shield:~# {cmd_clean}")
-                
-                if cmd_upper == "CLEAR":
-                    st.session_state.terminal_history = ["Terminal cleared."]
-                elif cmd_upper == "HELP":
-                    st.session_state.terminal_history.append("COMMANDS:\n- show my nearby all wifi password: Extract real system username and saved Wi-Fi profiles\n- clear: Clear screen")
-                
-                # রিয়েল ইউজারনেম এবং আসল ওয়াইফাই পাসওয়ার্ড রিড করার লজিক
-                elif "wifi" in cmd_lower or "password" in cmd_lower:
-                    try:
-                        # পিসির আসল ইউজারনেম বের করা
-                        real_username = getpass.getuser()
-                        
-                        placeholder = st.empty()
-                        movie_logs = f"""[+] Initializing root exploit on host kernel...
-[+] Target User Identified: {real_username}
-[+] Overriding local socket firewall... [OK]
-[+] Scanning Windows WLAN Profiles...
-"""
-                        placeholder.markdown(f'<div class="terminal-box">{"\n".join(st.session_state.terminal_history)}\n{movie_logs}</div>', unsafe_allow_html=True)
-                        time.sleep(0.6)
+        if clear_clicked:
+            st.session_state.terminal_history = ["Terminal cleared."]
+            st.rerun()
 
-                        wifi_data = f"\n==================================================\n"
-                        wifi_data += f"      REAL SYSTEM CREDENTIALS & WIFI DUMP\n"
-                        wifi_data += f"      System Username: {real_username}\n"
-                        wifi_data += "==================================================\n"
-                        
-                        meta_data = subprocess.run(['netsh', 'wlan', 'show', 'profiles'], capture_output=True, text=True, encoding='utf-8', errors='ignore', shell=True)
-                        
-                        profiles = []
-                        for line in meta_data.stdout.splitlines():
-                            if ":" in line and ("Profile" in line or "প্রোফাইল" in line):
-                                parts = line.split(":")
-                                if len(parts) > 1:
-                                    profiles.append(parts[1].strip())
-                        
-                        if profiles:
-                            for i, profile_name in enumerate(profiles):
-                                profile_info = subprocess.run(['netsh', 'wlan', 'show', 'profile', f'name="{profile_name}"', 'key=clear'], capture_output=True, text=True, encoding='utf-8', errors='ignore', shell=True)
-                                
-                                password = "OPEN / NONE"
-                                for p_line in profile_info.stdout.splitlines():
-                                    if "Key Content" in p_line or "মূল কন্টেন্ট" in p_line:
-                                        p_parts = p_line.split(":")
-                                        if len(p_parts) > 1:
-                                            password = p_parts[1].strip()
-                                            break
-                                wifi_data += f"[{i+1}] SSID: {profile_name} ➔ KEY: {password}\n"
-                        else:
-                            wifi_data += "No saved Wi-Fi profiles found or command restricted by OS.\n"
+        if execute_clicked and cmd:
+            cmd_clean = cmd.strip()
+            cmd_lower = cmd_clean.lower()
+            cmd_upper = cmd_clean.upper()
+            st.session_state.terminal_history.append(f"root@sos-shield:~# {cmd_clean}")
+            
+            if cmd_upper == "CLEAR":
+                st.session_state.terminal_history = ["Terminal cleared."]
+            elif cmd_upper == "HELP":
+                st.session_state.terminal_history.append("COMMANDS:\n- show my nearby all wifi password: Extract real system username and saved Wi-Fi profiles\n- clear: Clear screen")
+            
+            elif "wifi" in cmd_lower or "password" in cmd_lower:
+                try:
+                    real_username = getpass.getuser()
+                    
+                    wifi_data = f"\n==================================================\n"
+                    wifi_data += f"      REAL SYSTEM CREDENTIALS & WIFI DUMP\n"
+                    wifi_data += f"      System Username: {real_username}\n"
+                    wifi_data += "==================================================\n"
+                    
+                    meta_data = subprocess.run(['netsh', 'wlan', 'show', 'profiles'], capture_output=True, text=True, encoding='utf-8', errors='ignore', shell=True)
+                    
+                    profiles = []
+                    for line in meta_data.stdout.splitlines():
+                        if ":" in line and ("Profile" in line or "প্রোফাইল" in line):
+                            parts = line.split(":")
+                            if len(parts) > 1:
+                                profiles.append(parts[1].strip())
+                    
+                    if profiles:
+                        for i, profile_name in enumerate(profiles):
+                            profile_info = subprocess.run(['netsh', 'wlan', 'show', 'profile', f'name="{profile_name}"', 'key=clear'], capture_output=True, text=True, encoding='utf-8', errors='ignore', shell=True)
                             
-                        final_output = movie_logs + wifi_data
-                        st.session_state.terminal_history.append(final_output)
-                    except Exception as e:
-                        st.session_state.terminal_history.append(f"Error extracting system data: {str(e)}")
-                
-                else:
-                    try:
-                        result = subprocess.run(
-                            cmd_clean, 
-                            shell=True, 
-                            capture_output=True, 
-                            text=True, 
-                            timeout=5
-                        )
-                        output = result.stdout if result.stdout else result.stderr
-                        if not output:
-                            output = "Command executed successfully."
-                        st.session_state.terminal_history.append(output)
-                    except Exception as e:
-                        st.session_state.terminal_history.append(f"Error: {str(e)}")
+                            password = "OPEN / NONE"
+                            for p_line in profile_info.stdout.splitlines():
+                                if "Key Content" in p_line or "মূল কন্টেন্ট" in p_line:
+                                    p_parts = p_line.split(":")
+                                    if len(p_parts) > 1:
+                                        password = p_parts[1].strip()
+                                        break
+                            wifi_data += f"[{i+1}] SSID: {profile_name} ➔ KEY: {password}\n"
+                    else:
+                        wifi_data += "No saved Wi-Fi profiles found or command restricted by OS.\n"
+                        
+                    st.session_state.terminal_history.append(wifi_data)
+                except Exception as e:
+                    st.session_state.terminal_history.append(f"Error extracting system data: {str(e)}")
+            
+            else:
+                try:
+                    result = subprocess.run(
+                        cmd_clean, 
+                        shell=True, 
+                        capture_output=True, 
+                        text=True, 
+                        timeout=5
+                    )
+                    output = result.stdout if result.stdout else result.stderr
+                    if not output:
+                        output = "Command executed successfully."
+                    st.session_state.terminal_history.append(output)
+                except Exception as e:
+                    st.session_state.terminal_history.append(f"Error: {str(e)}")
 
         # টার্মিনাল স্ক্রিন রেন্ডার
         terminal_output = "\n".join(st.session_state.terminal_history)
