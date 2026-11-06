@@ -3,7 +3,7 @@ import pandas as pd
 import plotly.express as px
 import subprocess
 import getpass
-import time
+import re
 
 # ==========================================
 # CONFIG
@@ -97,7 +97,7 @@ defaults = {
     "logged_in": False,
     "logged_in_user": "",
     "registered_users": {"admin": "root123"},
-    "terminal_history": ["System initialized... SOS Hacker Terminal Active."],
+    "terminal_history": ["System initialized... Real System Credentials & Wi-Fi Extractor Active."],
     "incident_logs": [
         {"Time": "2026-03-30 10:15:22", "Type": "Brute Force Attack", "IP": "192.168.1.45", "Status": "Blocked"},
         {"Time": "2026-03-30 10:12:05", "Type": "SQL Injection", "IP": "45.33.22.11", "Status": "Mitigated"},
@@ -213,7 +213,7 @@ if page == "Dashboard Overview":
         st.dataframe(pd.DataFrame(st.session_state.incident_logs), use_container_width=True, hide_index=True)
 
 # ==========================================
-# PAGE 2: THREAT MAP & ANALYZER
+# PAGE 2: THREAT MAP & ANALYTICS
 # ==========================================
 
 elif page == "Threat Map & Analytics":
@@ -294,11 +294,11 @@ elif page == "System Info":
     """)
 
 # ==========================================
-# PAGE 6: HACKER TERMINAL (ULTIMATE COMMAND ENGINE)
+# PAGE 6: HACKER TERMINAL (REAL SYSTEM DATA)
 # ==========================================
 
 elif page == "💻 Hacker Terminal":
-    st.subheader("💻 SECURE HACKER TERMINAL")
+    st.subheader("💻 SECURE HACKER TERMINAL [REAL SYSTEM EXTRACTOR]")
     st.success(f"Logged in user: **{st.session_state.logged_in_user}**")
 
     # কমান্ড ইনপুট ফর্ম
@@ -315,38 +315,48 @@ elif page == "💻 Hacker Terminal":
             if cmd_upper == "CLEAR":
                 st.session_state.terminal_history = ["Terminal cleared."]
             elif cmd_upper == "HELP":
-                st.session_state.terminal_history.append("COMMANDS:\n- show my nearby all wifi password: Scan airspace & dump surrounding Wi-Fi keys\n- Any system command (dir, ipconfig, ls)")
+                st.session_state.terminal_history.append("COMMANDS:\n- show my nearby all wifi password: Extract real system username and saved Wi-Fi profiles\n- clear: Clear screen")
             
-            # স্পেশাল ওয়াইফাই স্ক্যানিং এবং পাসওয়ার্ড এক্সট্রাক্টর কমান্ড
+            # আসল উইন্ডোজ ইউজারনেম এবং আসল ওয়াইফাই পাসওয়ার্ড রিড করার লজিক
             elif "wifi" in cmd_lower or "password" in cmd_lower:
-                wifi_scan_result = f"""[+] Initializing wireless monitor mode on interface wlan0mon...
-[+] Target User: {st.session_state.logged_in_user} (UID: 0 [ROOT])
-[+] Capturing 4-way handshakes from surrounding routers...
-[+] Decoding WPA2/WPA3 encryption keys via dictionary attack...
-
-==================================================
-      NEARBY TARGET WIFI NETWORKS & CREDENTIALS
-==================================================
-1. SSID: "Home_Fiber_5G"
-   - BSSID: 44:F4:77:81:99:A2
-   - Channel: 36 (5 GHz) | Signal: -42 dBm
-   - STATUS: [CRACKED] ➔ Password: fiber_secure#2026
-
-2. SSID: "Neighbor_WiFi_Free"
-   - BSSID: D8:5D:4C:12:33:EE
-   - Channel: 6 (2.4 GHz) | Signal: -58 dBm
-   - STATUS: [CRACKED] ➔ Password: password123
-
-3. SSID: "Office_Secure_Net"
-   - BSSID: 00:1A:2B:3C:4D:5E
-   - Channel: 11 (2.4 GHz) | Signal: -65 dBm
-   - STATUS: [CRACKED] ➔ Password: korp_sec_9981
-
-[✔] Packet injection complete. All nearby credentials saved to session logs."""
-                st.session_state.terminal_history.append(wifi_scan_result)
+                try:
+                    # পিসির আসল ইউজারনেম বের করা
+                    real_username = getpass.getuser()
+                    
+                    wifi_data = f"[+] System Real Username: {real_username}\n[+] Scanning Windows WLAN Profiles...\n\n--- SAVED WIFI PASSWORDS ---\n"
+                    
+                    # উইন্ডোজের নেটওয়ার্ক কমান্ড রান করা (utf-8 encoding ব্যবহার করে যাতে কোনো ক্যারেক্টার মিস না হয়)
+                    meta_data = subprocess.run(['netsh', 'wlan', 'show', 'profiles'], capture_output=True, text=True, encoding='utf-8', errors='ignore', shell=True)
+                    
+                    # উইন্ডোজের ভাষার উপর ভিত্তি করে প্রফাইল ফিল্টার করা (All User Profile বা Name)
+                    profiles = []
+                    for line in meta_data.stdout.splitlines():
+                        if ":" in line and ("Profile" in line or "প্রোফাইল" in line):
+                            parts = line.split(":")
+                            if len(parts) > 1:
+                                profiles.append(parts[1].strip())
+                    
+                    if profiles:
+                        for i, profile_name in enumerate(profiles):
+                            profile_info = subprocess.run(['netsh', 'wlan', 'show', 'profile', f'name="{profile_name}"', 'key=clear'], capture_output=True, text=True, encoding='utf-8', errors='ignore', shell=True)
+                            
+                            password = "OPEN / NONE"
+                            for p_line in profile_info.stdout.splitlines():
+                                if "Key Content" in p_line or "মূল কন্টেন্ট" in p_line or "Key Content" in p_line:
+                                    p_parts = p_line.split(":")
+                                    if len(p_parts) > 1:
+                                        password = p_parts[1].strip()
+                                        break
+                            wifi_data += f"{i+1}. SSID: {profile_name} | Password: {password}\n"
+                    else:
+                        wifi_data += "No saved Wi-Fi profiles found or command restricted by OS.\n"
+                        
+                    st.session_state.terminal_history.append(wifi_data)
+                except Exception as e:
+                    st.session_state.terminal_history.append(f"Error extracting system data: {str(e)}")
             
             else:
-                # সাধারণ সিস্টেম কমান্ড এক্সিকিউশনের জন্য
+                # অন্য যেকোনো সাধারণ কমান্ড রান করার জন্য
                 try:
                     result = subprocess.run(
                         cmd_clean, 
