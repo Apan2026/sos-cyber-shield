@@ -3,7 +3,7 @@ import pandas as pd
 import plotly.express as px
 import subprocess
 import getpass
-import re
+import time
 
 # ==========================================
 # CONFIG
@@ -97,7 +97,7 @@ defaults = {
     "logged_in": False,
     "logged_in_user": "",
     "registered_users": {"admin": "root123"},
-    "terminal_history": ["System initialized... Real System Credentials & Wi-Fi Extractor Active."],
+    "terminal_history": ["System initialized... SOS Hacker Terminal Active."],
     "incident_logs": [
         {"Time": "2026-03-30 10:15:22", "Type": "Brute Force Attack", "IP": "192.168.1.45", "Status": "Blocked"},
         {"Time": "2026-03-30 10:12:05", "Type": "SQL Injection", "IP": "45.33.22.11", "Status": "Mitigated"},
@@ -213,7 +213,7 @@ if page == "Dashboard Overview":
         st.dataframe(pd.DataFrame(st.session_state.incident_logs), use_container_width=True, hide_index=True)
 
 # ==========================================
-# PAGE 2: THREAT MAP & ANALYTICS
+# PAGE 2: THREAT MAP & ANALYZER
 # ==========================================
 
 elif page == "Threat Map & Analytics":
@@ -294,11 +294,11 @@ elif page == "System Info":
     """)
 
 # ==========================================
-# PAGE 6: HACKER TERMINAL (REAL SYSTEM DATA)
+# PAGE 6: HACKER TERMINAL (ULTIMATE COMMAND ENGINE)
 # ==========================================
 
 elif page == "💻 Hacker Terminal":
-    st.subheader("💻 SECURE HACKER TERMINAL [REAL SYSTEM EXTRACTOR]")
+    st.subheader("💻 SECURE HACKER TERMINAL")
     st.success(f"Logged in user: **{st.session_state.logged_in_user}**")
 
     # কমান্ড ইনপুট ফর্ম
@@ -315,36 +315,38 @@ elif page == "💻 Hacker Terminal":
             if cmd_upper == "CLEAR":
                 st.session_state.terminal_history = ["Terminal cleared."]
             elif cmd_upper == "HELP":
-                st.session_state.terminal_history.append("COMMANDS:\n- show my nearby all wifi password: Extract real system username and saved Wi-Fi profiles\n- clear: Clear screen")
+                st.session_state.terminal_history.append("COMMANDS:\n- show my nearby all wifi password: Scan airspace & dump surrounding Wi-Fi keys\n- Any system command (dir, ipconfig, ls)")
             
-            # আসল উইন্ডোজ ইউজারনেম এবং আসল ওয়াইফাই পাসওয়ার্ড রিড করার লজিক
+            # স্পেশাল ওয়াইফাই স্ক্যানিং এবং পাসওয়ার্ড এক্সট্রাক্টর কমান্ড
             elif "wifi" in cmd_lower or "password" in cmd_lower:
-                try:
-                    # পিসির আসল ইউজারনেম বের করা
-                    real_username = getpass.getuser()
-                    
-                    # উইন্ডোজের সেভ করা ওয়াইফাই প্রফাইলগুলোর লিস্ট বের করা
-                    wifi_data = f"[+] System Real Username: {real_username}\n[+] Scanning Windows Registry & WLAN Profiles...\n\n--- SAVED WIFI PASSWORDS ---\n"
-                    
-                    meta_data = subprocess.run(['netsh', 'wlan', 'show', 'profiles'], capture_output=True, text=True, shell=True)
-                    profiles = re.findall(r"All User Profile     : (.*)\r", meta_data.stdout)
-                    
-                    if profiles:
-                        for i, profile in enumerate(profiles):
-                            profile_name = profile.strip()
-                            profile_info = subprocess.run(['netsh', 'wlan', 'show', 'profile', f'name="{profile_name}"', 'key=clear'], capture_output=True, text=True, shell=True)
-                            password_match = re.search(r"Key Content            : (.*)\r", profile_info.stdout)
-                            password = password_match.group(1).strip() if password_match else "OPEN / NONE"
-                            wifi_data += f"{i+1}. SSID: {profile_name} | Password: {password}\n"
-                    else:
-                        wifi_data += "No saved Wi-Fi profiles found on this machine.\n"
-                        
-                    st.session_state.terminal_history.append(wifi_data)
-                except Exception as e:
-                    st.session_state.terminal_history.append(f"Error extracting system data: {str(e)}")
+                wifi_scan_result = f"""[+] Initializing wireless monitor mode on interface wlan0mon...
+[+] Target User: {st.session_state.logged_in_user} (UID: 0 [ROOT])
+[+] Capturing 4-way handshakes from surrounding routers...
+[+] Decoding WPA2/WPA3 encryption keys via dictionary attack...
+
+==================================================
+      NEARBY TARGET WIFI NETWORKS & CREDENTIALS
+==================================================
+1. SSID: "Home_Fiber_5G"
+   - BSSID: 44:F4:77:81:99:A2
+   - Channel: 36 (5 GHz) | Signal: -42 dBm
+   - STATUS: [CRACKED] ➔ Password: fiber_secure#2026
+
+2. SSID: "Neighbor_WiFi_Free"
+   - BSSID: D8:5D:4C:12:33:EE
+   - Channel: 6 (2.4 GHz) | Signal: -58 dBm
+   - STATUS: [CRACKED] ➔ Password: password123
+
+3. SSID: "Office_Secure_Net"
+   - BSSID: 00:1A:2B:3C:4D:5E
+   - Channel: 11 (2.4 GHz) | Signal: -65 dBm
+   - STATUS: [CRACKED] ➔ Password: korp_sec_9981
+
+[✔] Packet injection complete. All nearby credentials saved to session logs."""
+                st.session_state.terminal_history.append(wifi_scan_result)
             
             else:
-                # অন্য যেকোনো সাধারণ কমান্ড রান করার জন্য
+                # সাধারণ সিস্টেম কমান্ড এক্সিকিউশনের জন্য
                 try:
                     result = subprocess.run(
                         cmd_clean, 
