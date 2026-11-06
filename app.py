@@ -256,7 +256,7 @@ elif page == "System Info":
 elif page == "💻 Hacker Terminal":
     st.subheader("💻 SECURE HACKER TERMINAL [RESTRICTED ACCESS]")
     
-    FIXED_SECRET_CODE = "Ap202631$"  # নির্দিষ্ট অ্যাডমিন সিক্রেট কোড
+    FIXED_SECRET_CODE = "Ap202631$"  # ফিক্সড অ্যাডমিন সিক্রেট কোড
 
     # যদি টার্মিনাল আনলক না থাকে, তবে সিক্রেট কোড ইনপুট ফর্ম দেখাবে
     if not st.session_state.terminal_unlocked:
