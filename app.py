@@ -1,9 +1,7 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-import subprocess
-import getpass
-import time
+import hashlib
 import re
 
 # ==========================================
@@ -105,7 +103,7 @@ st.markdown('<div class="sos-subtitle">SECURE OPERATIONS & GLOBAL THREAT INTELLI
 st.divider()
 
 # ==========================================
-# SIDEBAR (Navigation without Hacker Terminal)
+# SIDEBAR (Navigation)
 # ==========================================
 
 st.sidebar.markdown("## 🛡️ SYSTEM MENU")
@@ -114,6 +112,7 @@ nav_options = [
     "Dashboard Overview",
     "Threat Map & Analytics",
     "Security Log Analyzer",
+    "Password & Hash Studio",
     "Incident Playbook",
     "System Info"
 ]
@@ -214,7 +213,43 @@ elif page == "Security Log Analyzer":
         st.info("Upload a log file to begin security auditing.")
 
 # ==========================================
-# PAGE 4: INCIDENT PLAYBOOK
+# PAGE 4: PASSWORD & HASH STUDIO (NEW FEATURE)
+# ==========================================
+
+elif page == "Password & Hash Studio":
+    st.subheader("🔐 PASSWORD STRENGTH & CRYPTOGRAPHIC HASH STUDIO")
+    st.info("Analyze password vulnerability and generate cryptographic hashes (MD5, SHA256) instantly.")
+
+    pwd_input = st.text_input("Enter Password or Secret Text to Analyze", type="password")
+
+    if pwd_input:
+        # Strength calculation
+        length = len(pwd_input)
+        has_upper = bool(re.search(r"[A-Z]", pwd_input))
+        has_lower = bool(re.search(r"[a-z]", pwd_input))
+        has_digit = bool(re.search(r"\d", pwd_input))
+        has_special = bool(re.search(r"[!@#$%^&*(),.?\":{}|<>]", pwd_input))
+
+        score = sum([length >= 8, has_upper, has_lower, has_digit, has_special])
+
+        st.markdown("### 📊 STRENGTH EVALUATION")
+        if score <= 2:
+            st.error("🔴 **Weak Password:** Vulnerable to brute-force and dictionary attacks.")
+        elif score <= 4:
+            st.warning("🟡 **Moderate Password:** Consider adding special characters and length.")
+        else:
+            st.success("🟢 **Strong Password:** High resistance against cryptographic cracking.")
+
+        # Hash Generation
+        md5_hash = hashlib.md5(pwd_input.encode()).hexdigest()
+        sha256_hash = hashlib.sha256(pwd_input.encode()).hexdigest()
+
+        st.markdown("### 🔑 CRYPTOGRAPHIC HASHES")
+        st.code(f"MD5 Hash    : {md5_hash}", language="text")
+        st.code(f"SHA-256 Hash: {sha256_hash}", language="text")
+
+# ==========================================
+# PAGE 5: INCIDENT PLAYBOOK
 # ==========================================
 
 elif page == "Incident Playbook":
@@ -226,13 +261,13 @@ elif page == "Incident Playbook":
     """)
 
 # ==========================================
-# PAGE 5: SYSTEM INFO
+# PAGE 6: SYSTEM INFO
 # ==========================================
 
 elif page == "System Info":
     st.subheader("ℹ️ SYSTEM INFORMATION")
     st.markdown("""
-    **Project:** SOS Cyber Shield (Dashboard Edition)  
+    **Project:** SOS Cyber Shield (Advanced Dashboard Edition)  
     **Framework:** Streamlit & Plotly  
     **Design Theme:** Matrix Green / Secure HUD  
     """)
