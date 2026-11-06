@@ -18,7 +18,7 @@ st.set_page_config(
 )
 
 # ==========================================
-# DESIGN & STYLING (Hacker Movie Terminal Theme)
+# DESIGN & STYLING
 # ==========================================
 
 st.markdown("""
@@ -76,28 +76,6 @@ div[data-testid="stMetric"] label {
     letter-spacing: 2px;
     font-family: 'Courier New', monospace;
 }
-.terminal-box {
-    background: #000000;
-    color: #00ff66;
-    padding: 18px;
-    border-radius: 6px;
-    border: 1px solid #00ff66;
-    font-family: 'Courier New', monospace;
-    font-size: 14px;
-    white-space: pre-wrap;
-    box-shadow: inset 0 0 15px rgba(0, 255, 102, 0.3);
-}
-input[type="text"] {
-    background-color: #000000 !important;
-    color: #00ff66 !important;
-    border: 1px solid #00ff66 !important;
-    font-family: 'Courier New', monospace !important;
-    border-radius: 4px !important;
-}
-input[type="text"]:focus {
-    border: 1px solid #ffffff !important;
-    box-shadow: 0 0 8px rgba(0, 255, 102, 0.5) !important;
-}
 </style>
 """, unsafe_allow_html=True)
 
@@ -107,8 +85,6 @@ input[type="text"]:focus {
 
 defaults = {
     "sos_triggered": False,
-    "terminal_unlocked": False,
-    "terminal_history": ["// ROOT ACCESS TERMINAL v4.2.0", "// System initialized... Terminal Locked. Enter Secret Code."],
     "incident_logs": [
         {"Time": "2026-03-30 10:15:22", "Type": "Brute Force Attack", "IP": "192.168.1.45", "Status": "Blocked"},
         {"Time": "2026-03-30 10:12:05", "Type": "SQL Injection", "IP": "45.33.22.11", "Status": "Mitigated"},
@@ -129,7 +105,7 @@ st.markdown('<div class="sos-subtitle">SECURE OPERATIONS & GLOBAL THREAT INTELLI
 st.divider()
 
 # ==========================================
-# SIDEBAR (Navigation)
+# SIDEBAR (Navigation without Hacker Terminal)
 # ==========================================
 
 st.sidebar.markdown("## 🛡️ SYSTEM MENU")
@@ -139,8 +115,7 @@ nav_options = [
     "Threat Map & Analytics",
     "Security Log Analyzer",
     "Incident Playbook",
-    "System Info",
-    "💻 Hacker Terminal"
+    "System Info"
 ]
 
 page = st.sidebar.radio("NAVIGATION", nav_options)
@@ -257,128 +232,10 @@ elif page == "Incident Playbook":
 elif page == "System Info":
     st.subheader("ℹ️ SYSTEM INFORMATION")
     st.markdown("""
-    **Project:** SOS Cyber Shield (Hacker Terminal Edition)  
+    **Project:** SOS Cyber Shield (Dashboard Edition)  
     **Framework:** Streamlit & Plotly  
-    **Design Theme:** Matrix Green / Movie Hacker HUD  
+    **Design Theme:** Matrix Green / Secure HUD  
     """)
-
-# ==========================================
-# PAGE 6: HACKER TERMINAL (SECRET CODE PROTECTED)
-# ==========================================
-
-elif page == "💻 Hacker Terminal":
-    st.subheader("💻 SECURE HACKER TERMINAL [RESTRICTED ACCESS]")
-    
-    FIXED_SECRET_CODE = "Ap202631$"
-
-    # যদি টার্মিনাল আনলক না থাকে
-    if not st.session_state.terminal_unlocked:
-        st.warning("🔒 Terminal is locked. Enter the fixed secret code to open terminal access.")
-        
-        entered_code = st.text_input("Enter Terminal Secret Code", type="password", key="unlock_input")
-        if st.button("Unlock Terminal"):
-            if entered_code == FIXED_SECRET_CODE:
-                st.session_state.terminal_unlocked = True
-                st.session_state.terminal_history.append("[✔] Access Granted. Root privileges acquired.")
-                st.success("Access Granted! Loading terminal...")
-                st.rerun()
-            else:
-                st.error("❌ Incorrect Secret Code! Access Denied.")
-    
-    # টার্মিনাল আনলক হলে
-    else:
-        st.success("Terminal Status: **UNLOCKED [🟢]**")
-
-        cmd = st.text_input("root@sos-shield:~#", placeholder="Type format: getpass <username> OR show wifi <ssid>", key="term_cmd")
-        col_btn1, col_btn2 = st.columns([1, 5])
-        
-        execute_clicked = col_btn1.button("Execute")
-        clear_clicked = col_btn2.button("Clear Screen")
-
-        if clear_clicked:
-            st.session_state.terminal_history = ["Terminal cleared."]
-            st.rerun()
-
-        if execute_clicked and cmd:
-            cmd_clean = cmd.strip()
-            cmd_lower = cmd_clean.lower()
-            cmd_upper = cmd_clean.upper()
-            st.session_state.terminal_history.append(f"root@sos-shield:~# {cmd_clean}")
-            
-            if cmd_upper == "CLEAR":
-                st.session_state.terminal_history = ["Terminal cleared."]
-            elif cmd_upper == "HELP":
-                st.session_state.terminal_history.append("COMMANDS:\n- getpass <username>: Get specific user details & credentials\n- show wifi <ssid>: Get password for a specific WiFi network\n- clear: Clear screen")
-            
-            # নির্দিষ্ট ইউজারনেম ইনপুট দিলে তার তথ্য দেখানোর কমান্ড
-            elif cmd_lower.startswith("getpass"):
-                parts = cmd_clean.split(" ", 1)
-                target_user = parts[1].strip() if len(parts) > 1 else ""
-                
-                if target_user:
-                    current_sys_user = getpass.getuser()
-                    result_text = f"\n==================================================\n"
-                    result_text += f"      TARGET USER QUERY: {target_user}\n"
-                    result_text += f"==================================================\n"
-                    
-                    if target_user.lower() == current_sys_user.lower() or target_user.lower() == "admin":
-                        result_text += f"[+] Username: {target_user}\n"
-                        result_text += f"[+] Privilege Level: ROOT / ADMINISTRATOR\n"
-                        result_text += f"[+] Status: ACTIVE [🟢]\n"
-                        result_text += f"[+] Password Hash: $6$rounds=65536$apsystem2026secure...\n"
-                        result_text += f"[+] Auth Key: Ap202631$\n"
-                    else:
-                        result_text += f"[-] User '{target_user}' found in shadow database.\n"
-                        result_text += f"[+] Access Token: restricted_token_9982\n"
-                        result_text += f"[+] Password: sec_pass_{target_user}#2026\n"
-                    
-                    st.session_state.terminal_history.append(result_text)
-                else:
-                    st.session_state.terminal_history.append("Error: Please specify a username. Example: getpass admin")
-
-            # নির্দিষ্ট ওয়াইফাই SSID বা নাম দিলে তার পাসওয়ার্ড দেখানোর কমান্ড
-            elif cmd_lower.startswith("show wifi") or cmd_lower.startswith("wifi"):
-                parts = cmd_clean.split(" ", 2)
-                target_ssid = parts[2].strip() if len(parts) > 2 else (parts[1].strip() if len(parts) > 1 and parts[1].lower() != "wifi" else "")
-                
-                if target_ssid:
-                    try:
-                        profile_info = subprocess.run(['netsh', 'wlan', 'show', 'profile', f'name="{target_ssid}"', 'key=clear'], capture_output=True, text=True, encoding='utf-8', errors='ignore', shell=True)
-                        
-                        password = "NOT FOUND OR OPEN NETWORK"
-                        for p_line in profile_info.stdout.splitlines():
-                            if "Key Content" in p_line or "মূল কন্টেন্ট" in p_line:
-                                p_parts = p_line.split(":")
-                                if len(p_parts) > 1:
-                                    password = p_parts[1].strip()
-                                    break
-                        
-                        wifi_result = f"\n[+] Target WiFi SSID: {target_ssid}\n[+] Password Key: {password}\n"
-                        st.session_state.terminal_history.append(wifi_result)
-                    except Exception as e:
-                        st.session_state.terminal_history.append(f"Error fetching Wi-Fi profile: {str(e)}")
-                else:
-                    st.session_state.terminal_history.append("Error: Please specify a WiFi name. Example: show wifi HomeNetwork")
-            
-            else:
-                try:
-                    result = subprocess.run(
-                        cmd_clean, 
-                        shell=True, 
-                        capture_output=True, 
-                        text=True, 
-                        timeout=5
-                    )
-                    output = result.stdout if result.stdout else result.stderr
-                    if not output:
-                        output = "Command executed successfully."
-                    st.session_state.terminal_history.append(output)
-                except Exception as e:
-                    st.session_state.terminal_history.append(f"Error: {str(e)}")
-
-        # টার্মিনাল স্ক্রিন রেন্ডার
-        terminal_output = "\n".join(st.session_state.terminal_history)
-        st.markdown(f'<div class="terminal-box">{terminal_output}</div>', unsafe_allow_html=True)
 
 # ==========================================
 # FOOTER
