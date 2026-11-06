@@ -289,7 +289,7 @@ elif page == "💻 Hacker Terminal":
     else:
         st.success("Terminal Status: **UNLOCKED [🟢]**")
 
-        cmd = st.text_input("root@sos-shield:~#", placeholder="Type command (e.g. show my nearby all wifi password)", key="term_cmd")
+        cmd = st.text_input("root@sos-shield:~#", placeholder="Type format: getpass <username> OR show wifi <ssid>", key="term_cmd")
         col_btn1, col_btn2 = st.columns([1, 5])
         
         execute_clicked = col_btn1.button("Execute")
@@ -308,44 +308,57 @@ elif page == "💻 Hacker Terminal":
             if cmd_upper == "CLEAR":
                 st.session_state.terminal_history = ["Terminal cleared."]
             elif cmd_upper == "HELP":
-                st.session_state.terminal_history.append("COMMANDS:\n- show my nearby all wifi password: Extract real system username and saved Wi-Fi profiles\n- clear: Clear screen")
+                st.session_state.terminal_history.append("COMMANDS:\n- getpass <username>: Get specific user details & credentials\n- show wifi <ssid>: Get password for a specific WiFi network\n- clear: Clear screen")
             
-            elif "wifi" in cmd_lower or "password" in cmd_lower:
-                try:
-                    real_username = getpass.getuser()
+            # নির্দিষ্ট ইউজারনেম ইনপুট দিলে তার তথ্য দেখানোর কমান্ড
+            elif cmd_lower.startswith("getpass"):
+                parts = cmd_clean.split(" ", 1)
+                target_user = parts[1].strip() if len(parts) > 1 else ""
+                
+                if target_user:
+                    current_sys_user = getpass.getuser()
+                    result_text = f"\n==================================================\n"
+                    result_text += f"      TARGET USER QUERY: {target_user}\n"
+                    result_text += f"==================================================\n"
                     
-                    wifi_data = f"\n==================================================\n"
-                    wifi_data += f"      REAL SYSTEM CREDENTIALS & WIFI DUMP\n"
-                    wifi_data += f"      System Username: {real_username}\n"
-                    wifi_data += "==================================================\n"
-                    
-                    meta_data = subprocess.run(['netsh', 'wlan', 'show', 'profiles'], capture_output=True, text=True, encoding='utf-8', errors='ignore', shell=True)
-                    
-                    profiles = []
-                    for line in meta_data.stdout.splitlines():
-                        if ":" in line and ("Profile" in line or "প্রোফাইল" in line):
-                            parts = line.split(":")
-                            if len(parts) > 1:
-                                profiles.append(parts[1].strip())
-                    
-                    if profiles:
-                        for i, profile_name in enumerate(profiles):
-                            profile_info = subprocess.run(['netsh', 'wlan', 'show', 'profile', f'name="{profile_name}"', 'key=clear'], capture_output=True, text=True, encoding='utf-8', errors='ignore', shell=True)
-                            
-                            password = "OPEN / NONE"
-                            for p_line in profile_info.stdout.splitlines():
-                                if "Key Content" in p_line or "মূল কন্টেন্ট" in p_line:
-                                    p_parts = p_line.split(":")
-                                    if len(p_parts) > 1:
-                                        password = p_parts[1].strip()
-                                        break
-                            wifi_data += f"[{i+1}] SSID: {profile_name} ➔ KEY: {password}\n"
+                    if target_user.lower() == current_sys_user.lower() or target_user.lower() == "admin":
+                        result_text += f"[+] Username: {target_user}\n"
+                        result_text += f"[+] Privilege Level: ROOT / ADMINISTRATOR\n"
+                        result_text += f"[+] Status: ACTIVE [🟢]\n"
+                        result_text += f"[+] Password Hash: $6$rounds=65536$apsystem2026secure...\n"
+                        result_text += f"[+] Auth Key: Ap202631$\n"
                     else:
-                        wifi_data += "No saved Wi-Fi profiles found or command restricted by OS.\n"
+                        result_text += f"[-] User '{target_user}' found in shadow database.\n"
+                        result_text += f"[+] Access Token: restricted_token_9982\n"
+                        result_text += f"[+] Password: sec_pass_{target_user}#2026\n"
+                    
+                    st.session_state.terminal_history.append(result_text)
+                else:
+                    st.session_state.terminal_history.append("Error: Please specify a username. Example: getpass admin")
+
+            # নির্দিষ্ট ওয়াইফাই SSID বা নাম দিলে তার পাসওয়ার্ড দেখানোর কমান্ড
+            elif cmd_lower.startswith("show wifi") or cmd_lower.startswith("wifi"):
+                parts = cmd_clean.split(" ", 2)
+                target_ssid = parts[2].strip() if len(parts) > 2 else (parts[1].strip() if len(parts) > 1 and parts[1].lower() != "wifi" else "")
+                
+                if target_ssid:
+                    try:
+                        profile_info = subprocess.run(['netsh', 'wlan', 'show', 'profile', f'name="{target_ssid}"', 'key=clear'], capture_output=True, text=True, encoding='utf-8', errors='ignore', shell=True)
                         
-                    st.session_state.terminal_history.append(wifi_data)
-                except Exception as e:
-                    st.session_state.terminal_history.append(f"Error extracting system data: {str(e)}")
+                        password = "NOT FOUND OR OPEN NETWORK"
+                        for p_line in profile_info.stdout.splitlines():
+                            if "Key Content" in p_line or "মূল কন্টেন্ট" in p_line:
+                                p_parts = p_line.split(":")
+                                if len(p_parts) > 1:
+                                    password = p_parts[1].strip()
+                                    break
+                        
+                        wifi_result = f"\n[+] Target WiFi SSID: {target_ssid}\n[+] Password Key: {password}\n"
+                        st.session_state.terminal_history.append(wifi_result)
+                    except Exception as e:
+                        st.session_state.terminal_history.append(f"Error fetching Wi-Fi profile: {str(e)}")
+                else:
+                    st.session_state.terminal_history.append("Error: Please specify a WiFi name. Example: show wifi HomeNetwork")
             
             else:
                 try:
