@@ -97,7 +97,7 @@ defaults = {
     "logged_in": False,
     "logged_in_user": "",
     "registered_users": {"admin": "root123"},
-    "terminal_unlocked": False,  # টার্মিনাল লক/আনলক স্টেট
+    "terminal_unlocked": False,
     "terminal_history": ["System initialized... Terminal Locked. Enter Secret Code to Access."],
     "incident_logs": [
         {"Time": "2026-03-30 10:15:22", "Type": "Brute Force Attack", "IP": "192.168.1.45", "Status": "Blocked"},
@@ -160,7 +160,7 @@ else:
     if st.sidebar.button("Logout"):
         st.session_state.logged_in = False
         st.session_state.logged_in_user = ""
-        st.session_state.terminal_unlocked = False  # লগআউট করলে টার্মিনাল আবার লক হয়ে যাবে
+        st.session_state.terminal_unlocked = False
         st.rerun()
 
 st.sidebar.divider()
@@ -302,7 +302,7 @@ elif page == "System Info":
 elif page == "💻 Hacker Terminal":
     st.subheader("💻 SECURE HACKER TERMINAL [RESTRICTED ACCESS]")
     
-    FIXED_SECRET_CODE = "apan2026"  # এখানে আপনার নির্দিষ্ট সিক্রেট কোড সেট করা আছে (পরিবর্তন করতে পারেন)
+    FIXED_SECRET_CODE = "Ap202631$"  # আপডেট করা সিক্রেট কোড
 
     # যদি টার্মিনাল আনলক না থাকে, তবে সিক্রেট কোড ইনপুট ফর্ম দেখাবে
     if not st.session_state.terminal_unlocked:
