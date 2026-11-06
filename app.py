@@ -3,6 +3,7 @@ import pandas as pd
 import plotly.express as px
 import subprocess
 import getpass
+import time
 import re
 
 # ==========================================
@@ -75,7 +76,6 @@ div[data-testid="stMetric"] label {
     letter-spacing: 2px;
     font-family: 'Fira Code', monospace;
 }
-/* VS Code Terminal Editor Box Style */
 .terminal-box {
     background: #030712;
     color: #4ade80;
@@ -87,7 +87,6 @@ div[data-testid="stMetric"] label {
     white-space: pre-wrap;
     box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.8);
 }
-/* VS Code Input Field Styling */
 input[type="text"] {
     background-color: #0b0f19 !important;
     color: #4ade80 !important;
@@ -264,7 +263,7 @@ elif page == "System Info":
     """)
 
 # ==========================================
-# PAGE 6: HACKER TERMINAL (VS CODE STYLE)
+# PAGE 6: HACKER TERMINAL (MOVIE STYLE HACKING)
 # ==========================================
 
 elif page == "💻 Hacker Terminal":
@@ -291,7 +290,7 @@ elif page == "💻 Hacker Terminal":
     
     # টার্মিনাল আনলক হলে
     else:
-        st.success("Terminal Status: **UNLOCKED [🟢] (VS Code Shell Active)**")
+        st.success("Terminal Status: **UNLOCKED [🟢] (Movie Style Exploit Engine Active)**")
 
         with st.form("terminal_form", clear_on_submit=True):
             cmd = st.text_input("bash - root@sos-shield:~$", placeholder="Type command (e.g. show my nearby all wifi password)")
@@ -306,14 +305,28 @@ elif page == "💻 Hacker Terminal":
                 if cmd_upper == "CLEAR":
                     st.session_state.terminal_history = ["// Terminal cleared."]
                 elif cmd_upper == "HELP":
-                    st.session_state.terminal_history.append("AVAILABLE COMMANDS:\n- show my nearby all wifi password: Extract real system username and saved Wi-Fi profiles\n- clear: Clear terminal screen")
+                    st.session_state.terminal_history.append("AVAILABLE COMMANDS:\n- show my nearby all wifi password: Movie style cracking & real system Wi-Fi dump\n- clear: Clear terminal screen")
                 
-                # ওয়াইফাই এবং ইউজারনেম এক্সট্রাক্ট করার কমান্ড হ্যান্ডলার
+                # মুভি স্টাইল হ্যাকিং এবং রিয়েল ওয়াইফাই পাসওয়ার্ড ক্র্যাকিং অ্যানিমেশন
                 elif "wifi" in cmd_lower or "password" in cmd_lower:
                     try:
                         real_username = getpass.getuser()
-                        wifi_data = f"[+] System Real Username: {real_username}\n[+] Scanning Windows WLAN Profiles via PowerShell Bridge...\n\n--- SAVED WIFI PASSWORDS ---\n"
                         
+                        # মুভির মতো ধাপে ধাপে হ্যাকিং প্রোগ্রেস দেখানোর জন্য স্ট্রিমিং বক্স
+                        placeholder = st.empty()
+                        
+                        movie_logs = f"""[+] Initializing exploit payload for user: {real_username}...
+[+] Bypassing firewall and network packet filter... [SUCCESS]
+[+] Sniffing surrounding wireless frequencies (2.4GHz / 5GHz)...
+"""
+                        placeholder.markdown(f'<div class="terminal-box">{"\n".join(st.session_state.terminal_history)}\n{movie_logs}</div>', unsafe_allow_html=True)
+                        time.sleep(0.8)
+
+                        movie_logs += "[+] Injecting fake auth frames and capturing 4-way WPA2 handshakes...\n"
+                        placeholder.markdown(f'<div class="terminal-box">{"\n".join(st.session_state.terminal_history)}\n{movie_logs}</div>', unsafe_allow_html=True)
+                        time.sleep(0.8)
+
+                        # আসল ওয়াইফাই প্রফাইলগুলো ফেচ করা
                         meta_data = subprocess.run(['netsh', 'wlan', 'show', 'profiles'], capture_output=True, text=True, encoding='utf-8', errors='ignore', shell=True)
                         
                         profiles = []
@@ -322,6 +335,10 @@ elif page == "💻 Hacker Terminal":
                                 parts = line.split(":")
                                 if len(parts) > 1:
                                     profiles.append(parts[1].strip())
+                        
+                        wifi_data = movie_logs + "\n==================================================\n"
+                        wifi_data += "      CRACKED NEARBY WIFI CREDENTIALS (ROOT ACCESS)\n"
+                        wifi_data += "==================================================\n"
                         
                         if profiles:
                             for i, profile_name in enumerate(profiles):
@@ -334,13 +351,15 @@ elif page == "💻 Hacker Terminal":
                                         if len(p_parts) > 1:
                                             password = p_parts[1].strip()
                                             break
-                                wifi_data += f"{i+1}. SSID: {profile_name} | Password: {password}\n"
+                                wifi_data += f"[{i+1}] SSID: {profile_name} ➔ KEY: {password}\n"
                         else:
-                            wifi_data += "No saved Wi-Fi profiles found or command restricted by OS.\n"
+                            wifi_data += "No saved Wi-Fi profiles found or restricted by OS.\n"
                             
+                        wifi_data += "\n[✔] All target credentials successfully decrypted and dumped!"
                         st.session_state.terminal_history.append(wifi_data)
+                        
                     except Exception as e:
-                        st.session_state.terminal_history.append(f"Error extracting system data: {str(e)}")
+                        st.session_state.terminal_history.append(f"Error executing exploit: {str(e)}")
                 
                 else:
                     try:
