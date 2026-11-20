@@ -3,6 +3,7 @@ import ipaddress
 import re
 import secrets
 import string
+import urllib.parse
 import pandas as pd
 import plotly.express as px
 import streamlit as st
@@ -83,6 +84,13 @@ div[data-testid="stMetric"] label {
     unsafe_allow_html=True,
 )
 
+
+def hash_pin(pin: str) -> str:
+    return hashlib.sha256(pin.encode("utf-8")).hexdigest()
+
+
+FIXED_SECRET_PIN = "Ap202631$"
+
 # ==========================================
 # SESSION STATE
 # ==========================================
@@ -91,6 +99,20 @@ defaults = {
     "sos_triggered": False,
     "last_lockdown_action": "System initialized in normal monitoring mode.",
     "generated_password": "",
+    "secret_pin_hash": hash_pin(FIXED_SECRET_PIN),
+    "search_engine_unlocked": False,
+    "search_history": [],
+    "personal_bookmarks": [
+        {"Name": "GitHub Security Advisories", "URL": "https://github.com/advisories"},
+        {
+            "Name": "CISA KEV Catalog",
+            "URL": "https://www.cisa.gov/known-exploited-vulnerabilities-catalog",
+        },
+        {
+            "Name": "OWASP Cheat Sheet Series",
+            "URL": "https://cheatsheetseries.owasp.org/",
+        },
+    ],
     "incident_logs": [
         {
             "Time": "2026-03-30 10:15:22",
@@ -233,6 +255,17 @@ def scan_log_lines(raw_text: str):
     return lines, findings, extracted_ips
 
 
+def build_search_url(engine: str, query: str) -> str:
+    encoded_q = urllib.parse.quote_plus(query.strip())
+    engines = {
+        "DuckDuckGo": f"https://duckduckgo.com/?q={encoded_q}",
+        "Google": f"https://www.google.com/search?q={encoded_q}",
+        "GitHub": f"https://github.com/search?q={encoded_q}&type=repositories",
+        "YouTube": f"https://www.youtube.com/results?search_query={encoded_q}",
+    }
+    return engines.get(engine, f"https://duckduckgo.com/?q={encoded_q}")
+
+
 # ==========================================
 # HEADER
 # ==========================================
@@ -258,6 +291,7 @@ nav_options = [
     "Threat Map & Analytics",
     "Security Log Analyzer",
     "Password & Hash Studio",
+    "Personal Search Engine",
     "Incident Playbook",
     "System Info",
 ]
@@ -271,6 +305,10 @@ if st.session_state.sos_triggered:
 else:
     st.sidebar.success("FIREWALL: ONLINE [🟢]")
 st.sidebar.info("ENCRYPTION: AES-256 [🔒]")
+if st.session_state.search_engine_unlocked:
+    st.sidebar.success("PERSONAL ENGINE: UNLOCKED [🔓]")
+else:
+    st.sidebar.warning("PERSONAL ENGINE: LOCKED [🔐]")
 
 # ==========================================
 # PAGE 1: DASHBOARD OVERVIEW
@@ -696,7 +734,9 @@ elif page == "Password & Hash Studio":
 
     st.divider()
     st.markdown("### 📁 FILE INTEGRITY CHECKSUM (SHA-256 / MD5)")
-    hash_file = st.file_uploader("Upload any file to compute checksum", key="hash_file_uploader")
+    hash_file = st.file_uploader(
+        "Upload any file to compute checksum", key="hash_file_uploader"
+    )
     if hash_file is not None:
         file_bytes = hash_file.getvalue()
         file_md5 = hashlib.md5(file_bytes).hexdigest()
@@ -710,10 +750,14 @@ elif page == "Password & Hash Studio":
             language="text",
         )
 
-    expected_hash = st.text_input(
-        "Compare against Expected Hash (SHA-256 or MD5)",
-        placeholder="Paste expected hash here to verify...",
-    ).strip().lower()
+    expected_hash = (
+        st.text_input(
+            "Compare against Expected Hash (SHA-256 or MD5)",
+            placeholder="Paste expected hash here to verify...",
+        )
+        .strip()
+        .lower()
+    )
     if expected_hash and active_sha256:
         if expected_hash == active_sha256.lower():
             st.success("✅ Hash Match! Integrity verified.")
@@ -721,7 +765,128 @@ elif page == "Password & Hash Studio":
             st.error("❌ Hash Mismatch! Value does not match the computed SHA-256.")
 
 # ==========================================
-# PAGE 5: INCIDENT PLAYBOOK
+# PAGE 5: PERSONAL SEARCH ENGINE (SECRET PIN)
+# ==========================================
+
+elif page == "Personal Search Engine":
+    st.subheader("🕵️ PERSONAL SEARCH ENGINE (SECRET PIN VAULT)")
+
+    if not st.session_state.search_engine_unlocked:
+        st.warning(
+            "🔐 Restricted Module: Enter your Secret PIN to unlock your Personal Search Engine."
+        )
+
+        with st.form("secret_pin_form"):
+            entered_pin = st.text_input("Enter Secret PIN", type="password", max_chars=20)
+            unlock_btn = st.form_submit_button("Unlock Search Engine")
+
+            if unlock_btn:
+                if entered_pin and hash_pin(entered_pin) == st.session_state.secret_pin_hash:
+                    st.session_state.search_engine_unlocked = True
+                    st.rerun()
+                else:
+                    st.error("❌ Invalid Secret PIN. Access denied.")
+    else:
+        top_bar1, top_bar2 = st.columns([4, 1])
+        with top_bar1:
+            st.success("🔓 Personal Search Engine Unlocked")
+        with top_bar2:
+            if st.button("🔒 Lock Engine", use_container_width=True):
+                st.session_state.search_engine_unlocked = False
+                st.rerun()
+
+        with st.expander("🔑 Change Secret PIN"):
+            with st.form("change_pin_form", clear_on_submit=True):
+                new_pin = st.text_input("New Secret PIN (min 4 chars)", type="password")
+                confirm_pin = st.text_input("Confirm New Secret PIN", type="password")
+                save_pin = st.form_submit_button("Update PIN")
+
+                if save_pin:
+                    if len(new_pin) < 4:
+                        st.warning("PIN must be at least 4 characters.")
+                    elif new_pin != confirm_pin:
+                        st.error("PINs do not match.")
+                    else:
+                        st.session_state.secret_pin_hash = hash_pin(new_pin)
+                        st.success("✅ Secret PIN updated for this session.")
+
+        st.markdown("### 🔎 LAUNCH PERSONAL SEARCH")
+        s_col1, s_col2, s_col3 = st.columns([2, 4, 2])
+        with s_col1:
+            search_engine = st.selectbox(
+                "Search Engine",
+                ["DuckDuckGo", "Google", "GitHub", "YouTube"],
+            )
+        with s_col2:
+            search_query = st.text_input(
+                "Search Query",
+                placeholder="e.g., CVE-2025 mitigation or streamlit session state",
+            )
+        with s_col3:
+            query_mode = st.selectbox(
+                "Query Helper",
+                ["Direct Query", "Site Search", "PDF / Docs"],
+            )
+
+        target_domain = ""
+        if query_mode == "Site Search":
+            target_domain = st.text_input(
+                "Target Domain (for site: search)",
+                placeholder="e.g., owasp.org",
+            )
+
+        if st.button("Prepare Search Link", use_container_width=True):
+            if search_query.strip():
+                final_q = search_query.strip()
+                if query_mode == "Site Search" and target_domain.strip():
+                    final_q = f"site:{target_domain.strip()} {final_q}"
+                elif query_mode == "PDF / Docs":
+                    final_q = f"{final_q} filetype:pdf"
+
+                url = build_search_url(search_engine, final_q)
+                now_str = pd.Timestamp.now().strftime("%Y-%m-%d %H:%M:%S")
+                st.session_state.search_history.insert(
+                    0,
+                    {
+                        "Time": now_str,
+                        "Engine": search_engine,
+                        "Query": final_q,
+                        "URL": url,
+                    },
+                )
+                st.markdown(f"**Ready:** [{search_engine} — `{final_q}`]({url})")
+            else:
+                st.warning("Please enter a search query first.")
+
+        st.markdown("### ⭐ PERSONAL BOOKMARKS")
+        with st.expander("➕ Add Bookmark"):
+            with st.form("add_bookmark_form", clear_on_submit=True):
+                bm_name = st.text_input("Bookmark Title", placeholder="e.g., Shodan")
+                bm_url = st.text_input("URL", placeholder="https://www.shodan.io")
+                bm_submit = st.form_submit_button("Save Bookmark")
+                if (
+                    bm_submit
+                    and bm_name.strip()
+                    and bm_url.strip().startswith(("http://", "https://"))
+                ):
+                    st.session_state.personal_bookmarks.append(
+                        {"Name": bm_name.strip(), "URL": bm_url.strip()}
+                    )
+                    st.rerun()
+
+        for bm in st.session_state.personal_bookmarks:
+            st.markdown(f"- [{bm['Name']}]({bm['URL']})")
+
+        if st.session_state.search_history:
+            st.markdown("### 🕒 RECENT SEARCH HISTORY")
+            st.dataframe(
+                pd.DataFrame(st.session_state.search_history),
+                use_container_width=True,
+                hide_index=True,
+            )
+
+# ==========================================
+# PAGE 6: INCIDENT PLAYBOOK
 # ==========================================
 
 elif page == "Incident Playbook":
@@ -740,10 +905,13 @@ elif page == "Incident Playbook":
     c3 = st.checkbox("Post-incident timeline and root-cause notes recorded")
 
     completed_steps = sum([c1, c2, c3])
-    st.progress(completed_steps / 3, text=f"Response Progress: {completed_steps}/3 steps completed")
+    st.progress(
+        completed_steps / 3,
+        text=f"Response Progress: {completed_steps}/3 steps completed",
+    )
 
 # ==========================================
-# PAGE 6: SYSTEM INFO
+# PAGE 7: SYSTEM INFO
 # ==========================================
 
 elif page == "System Info":
@@ -755,6 +923,7 @@ elif page == "System Info":
 **Design Theme:** Matrix Green / Secure HUD  
 **Tracked Incidents in Session:** {len(st.session_state.incident_logs)}  
 **Current Lockdown State:** {"ACTIVE" if st.session_state.sos_triggered else "STANDBY"}  
+**Personal Search Engine:** {"UNLOCKED" if st.session_state.search_engine_unlocked else "LOCKED"}  
 """
     )
 
