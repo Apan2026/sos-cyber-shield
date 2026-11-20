@@ -1,4 +1,5 @@
 import hashlib
+import ipaddress
 import re
 import secrets
 import string
@@ -151,6 +152,87 @@ def generate_strong_password(
     return "".join(chars[:length])
 
 
+def classify_ip(ip_str: str) -> str:
+    try:
+        ip_obj = ipaddress.ip_address(ip_str.strip())
+        if ip_obj.is_loopback:
+            return "Loopback"
+        if ip_obj.is_private:
+            return "Private / Internal"
+        if ip_obj.is_reserved:
+            return "Reserved"
+        return "Public / External"
+    except ValueError:
+        return "Invalid IP"
+
+
+def scan_log_lines(raw_text: str):
+    lines = raw_text.splitlines()
+    patterns = [
+        (
+            r"(?i)(select\s+.+\s+from|union\s+select|or\s+1=1|drop\s+table)",
+            "HIGH",
+            "Database / Input",
+            "Potential SQL Injection pattern detected",
+        ),
+        (
+            r"(?i)(<script|javascript:|onerror\s*=|onload\s*=)",
+            "HIGH",
+            "Web Layer",
+            "Potential XSS payload pattern detected",
+        ),
+        (
+            r"(\.\./|\.\.\\|%2e%2e%2f|/etc/passwd|win\.ini)",
+            "HIGH",
+            "File / Path",
+            "Path traversal or sensitive file access attempt",
+        ),
+        (
+            r"(?i)(;\s*(cat|ls|whoami|uname|id|curl|wget)\b|\|\s*(sh|bash|cmd|powershell))",
+            "HIGH",
+            "OS / Execution",
+            "Potential command injection indicator",
+        ),
+        (
+            r"(?i)\bmd5\s*\(",
+            "MEDIUM",
+            "Auth / Crypto",
+            "Weak MD5 hash function usage detected",
+        ),
+        (
+            r"(?i)(failed password|invalid user|authentication failure|too many login attempts)",
+            "MEDIUM",
+            "Auth Service",
+            "Failed login / brute-force indicator",
+        ),
+        (
+            r"(?i)(sqlmap|nikto|nmap|masscan|dirbuster|gobuster)",
+            "LOW",
+            "Recon / Scanner",
+            "Known security scanner or recon tool signature",
+        ),
+    ]
+
+    findings = []
+    for idx, line in enumerate(lines, start=1):
+        for regex, severity, module, desc in patterns:
+            if re.search(regex, line):
+                findings.append(
+                    {
+                        "Line": idx,
+                        "Severity": severity,
+                        "Module": module,
+                        "Description": desc,
+                        "Snippet": line.strip()[:100],
+                    }
+                )
+
+    extracted_ips = sorted(
+        set(re.findall(r"\b(?:\d{1,3}\.){3}\d{1,3}\b", raw_text))
+    )
+    return lines, findings, extracted_ips
+
+
 # ==========================================
 # HEADER
 # ==========================================
@@ -198,12 +280,20 @@ if page == "Dashboard Overview":
     st.subheader("📊 THREAT METRICS & OVERVIEW")
 
     logs_df = pd.DataFrame(st.session_state.incident_logs)
-    investigating_count = int((logs_df["Status"] == "Investigating").sum()) if not logs_df.empty else 0
-    blocked_count = int((logs_df["Status"] == "Blocked").sum()) if not logs_df.empty else 0
+    investigating_count = (
+        int((logs_df["Status"] == "Investigating").sum()) if not logs_df.empty else 0
+    )
+    blocked_count = (
+        int((logs_df["Status"] == "Blocked").sum()) if not logs_df.empty else 0
+    )
     total_attacks = 1425 + len(st.session_state.incident_logs)
 
     col1, col2, col3, col4 = st.columns(4)
-    col1.metric("TOTAL ATTACKS", f"{total_attacks:,}", f"+{len(st.session_state.incident_logs)} logged")
+    col1.metric(
+        "TOTAL ATTACKS",
+        f"{total_attacks:,}",
+        f"+{len(st.session_state.incident_logs)} logged",
+    )
     col2.metric("BLOCKED IPS", str(340 + blocked_count), "Secure")
     col3.metric(
         "ACTIVE ALERTS",
@@ -235,6 +325,34 @@ if page == "Dashboard Overview":
             st.success("STATUS: NORMAL MONITORING")
 
         st.caption(f"Audit Note: {st.session_state.last_lockdown_action}")
+
+        st.markdown("### 🧪 LIVE THREAT SIMULATOR")
+        if st.button("Simulate Incoming Attack Event", use_container_width=True):
+            sim_types = [
+                ("Brute Force Attack", "Blocked"),
+                ("SQL Injection", "Mitigated"),
+                ("Unauthorized Access", "Investigating"),
+                ("DDoS", "Blocked"),
+                ("Phishing", "Investigating"),
+            ]
+            sim_type, sim_status = secrets.choice(sim_types)
+            sim_ip = (
+                f"{secrets.randbelow(200) + 11}."
+                f"{secrets.randbelow(254) + 1}."
+                f"{secrets.randbelow(254) + 1}."
+                f"{secrets.randbelow(254) + 1}"
+            )
+            now_str = pd.Timestamp.now().strftime("%Y-%m-%d %H:%M:%S")
+            st.session_state.incident_logs.insert(
+                0,
+                {
+                    "Time": now_str,
+                    "Type": sim_type,
+                    "IP": sim_ip,
+                    "Status": sim_status,
+                },
+            )
+            st.rerun()
 
     with col_right:
         st.markdown("### 📋 RECENT INCIDENT LOGS")
@@ -279,8 +397,16 @@ if page == "Dashboard Overview":
                 options=["Blocked", "Mitigated", "Investigating"],
                 default=["Blocked", "Mitigated", "Investigating"],
             )
-            filtered_logs = logs_df[logs_df["Status"].isin(status_filter)]
+            filtered_logs = logs_df[logs_df["Status"].isin(status_filter)].copy()
+            filtered_logs["IP Scope"] = filtered_logs["IP"].apply(classify_ip)
             st.dataframe(filtered_logs, use_container_width=True, hide_index=True)
+
+            st.download_button(
+                label="⬇️ Export Incident Logs (.csv)",
+                data=filtered_logs.to_csv(index=False),
+                file_name="sos_cyber_shield_incidents.csv",
+                mime="text/csv",
+            )
         else:
             st.info("No incident logs available.")
 
@@ -398,67 +524,65 @@ elif page == "Threat Map & Analytics":
 elif page == "Security Log Analyzer":
     st.subheader("🔍 LOG & VULNERABILITY INSPECTOR")
 
-    uploaded_file = st.file_uploader(
-        "Upload server log / code snippet (.txt, .log)", type=["txt", "log"]
+    input_mode = st.radio(
+        "Select Log Input Source",
+        ["Upload Log File (.txt, .log)", "Paste Raw Log Text"],
+        horizontal=True,
     )
 
-    if uploaded_file is not None:
-        raw_text = uploaded_file.getvalue().decode("utf-8", errors="replace")
-        lines = raw_text.splitlines()
-        st.success(f"Parsed {len(lines)} lines from '{uploaded_file.name}'.")
+    source_name = "pasted_logs.log"
+    raw_text = ""
 
-        patterns = [
-            (
-                r"(?i)(select\s+.+\s+from|union\s+select|or\s+1=1|drop\s+table)",
-                "HIGH",
-                "Database / Input",
-                "Potential SQL Injection pattern detected",
-            ),
-            (
-                r"(?i)\bmd5\s*\(",
-                "MEDIUM",
-                "Auth / Crypto",
-                "Weak MD5 hash function usage detected",
-            ),
-            (
-                r"(?i)(failed password|invalid user|authentication failure)",
-                "MEDIUM",
-                "Auth Service",
-                "Failed login / brute-force indicator",
-            ),
-            (
-                r"(?i)(<script|javascript:|onerror\s*=)",
-                "HIGH",
-                "Web Layer",
-                "Potential XSS payload pattern detected",
-            ),
-        ]
-
-        findings = []
-        for idx, line in enumerate(lines, start=1):
-            for regex, severity, module, desc in patterns:
-                if re.search(regex, line):
-                    findings.append(
-                        {
-                            "Line": idx,
-                            "Severity": severity,
-                            "Module": module,
-                            "Description": desc,
-                            "Snippet": line.strip()[:100],
-                        }
-                    )
-
-        extracted_ips = sorted(
-            set(re.findall(r"\b(?:\d{1,3}\.){3}\d{1,3}\b", raw_text))
+    if input_mode == "Upload Log File (.txt, .log)":
+        uploaded_file = st.file_uploader(
+            "Upload server log / code snippet (.txt, .log)", type=["txt", "log"]
         )
+        if uploaded_file is not None:
+            source_name = uploaded_file.name
+            raw_text = uploaded_file.getvalue().decode("utf-8", errors="replace")
+    else:
+        raw_text = st.text_area(
+            "Paste server logs or code lines below",
+            height=180,
+            placeholder="Example: 2026-03-30 Failed password for invalid user admin from 192.168.1.45 port 22",
+        )
+
+    if raw_text.strip():
+        lines, findings, extracted_ips = scan_log_lines(raw_text)
+        st.success(f"Parsed {len(lines)} lines from '{source_name}'.")
 
         if findings:
             st.error(f"⚠️ {len(findings)} Security Indicator(s) Found!")
             findings_df = pd.DataFrame(findings)
-            st.dataframe(findings_df, use_container_width=True, hide_index=True)
+
+            sev_filter = st.multiselect(
+                "Filter Findings by Severity",
+                options=["HIGH", "MEDIUM", "LOW"],
+                default=["HIGH", "MEDIUM", "LOW"],
+            )
+            filtered_findings = findings_df[findings_df["Severity"].isin(sev_filter)]
+            st.dataframe(filtered_findings, use_container_width=True, hide_index=True)
+
+            if not filtered_findings.empty:
+                sev_chart = px.bar(
+                    filtered_findings.groupby(["Module", "Severity"], as_index=False).size(),
+                    x="Module",
+                    y="size",
+                    color="Severity",
+                    barmode="group",
+                    height=280,
+                    labels={"size": "Count"},
+                )
+                sev_chart.update_layout(
+                    paper_bgcolor="#030712",
+                    plot_bgcolor="#050b14",
+                    font_color="#00ff66",
+                    margin=dict(l=0, r=0, t=20, b=0),
+                )
+                st.plotly_chart(sev_chart, use_container_width=True)
 
             report_lines = [
-                f"SOS CYBER SHIELD - LOG AUDIT REPORT ({uploaded_file.name})",
+                f"SOS CYBER SHIELD - LOG AUDIT REPORT ({source_name})",
                 f"Total Lines Scanned: {len(lines)}",
                 f"Findings Count: {len(findings)}",
                 f"Extracted IPs: {', '.join(extracted_ips) if extracted_ips else 'None'}",
@@ -473,17 +597,18 @@ elif page == "Security Log Analyzer":
             st.download_button(
                 label="⬇️ Download Audit Report (.txt)",
                 data="\n".join(report_lines),
-                file_name=f"{uploaded_file.name}_audit_report.txt",
+                file_name=f"{source_name}_audit_report.txt",
                 mime="text/plain",
             )
         else:
-            st.success("✅ No known heuristic threat patterns matched in the uploaded file.")
+            st.success("✅ No known heuristic threat patterns matched in the log input.")
 
         if extracted_ips:
             st.markdown("### 🌐 EXTRACTED IPv4 ADDRESSES")
-            st.code(", ".join(extracted_ips), language="text")
+            ip_summary = [{"IP": ip, "Scope": classify_ip(ip)} for ip in extracted_ips]
+            st.dataframe(pd.DataFrame(ip_summary), use_container_width=True, hide_index=True)
     else:
-        st.info("Upload a log or code snippet file to begin security auditing.")
+        st.info("Upload a log file or paste log lines to begin security auditing.")
 
 # ==========================================
 # PAGE 4: PASSWORD & HASH STUDIO
@@ -492,7 +617,7 @@ elif page == "Security Log Analyzer":
 elif page == "Password & Hash Studio":
     st.subheader("🔐 PASSWORD STRENGTH & CRYPTOGRAPHIC HASH STUDIO")
     st.info(
-        "Analyze password vulnerability, generate strong passwords, and compute cryptographic hashes."
+        "Analyze password vulnerability, generate strong passwords, and compute text or file hashes."
     )
 
     with st.expander("🎲 Strong Password Generator"):
@@ -523,6 +648,7 @@ elif page == "Password & Hash Studio":
         type="password",
     )
 
+    active_sha256 = ""
     if pwd_input:
         checks = {
             "At least 8 characters": len(pwd_input) >= 8,
@@ -553,13 +679,13 @@ elif page == "Password & Hash Studio":
             st.write(f"{'✅' if passed else '❌'} {label_text}")
 
         md5_hash = hashlib.md5(pwd_input.encode()).hexdigest()
-        sha256_hash = hashlib.sha256(pwd_input.encode()).hexdigest()
+        active_sha256 = hashlib.sha256(pwd_input.encode()).hexdigest()
         sha512_hash = hashlib.sha512(pwd_input.encode()).hexdigest()
 
         st.markdown("### 🔑 CRYPTOGRAPHIC HASHES")
         st.code(
             f"MD5 Hash    : {md5_hash}\n"
-            f"SHA-256 Hash: {sha256_hash}\n"
+            f"SHA-256 Hash: {active_sha256}\n"
             f"SHA-512 Hash: {sha512_hash}",
             language="text",
         )
@@ -567,6 +693,32 @@ elif page == "Password & Hash Studio":
             "Security Note: MD5 is cryptographically broken, and unsalted fast hashes like raw SHA-256 "
             "should not be used alone for real-world password storage (prefer Argon2 or bcrypt)."
         )
+
+    st.divider()
+    st.markdown("### 📁 FILE INTEGRITY CHECKSUM (SHA-256 / MD5)")
+    hash_file = st.file_uploader("Upload any file to compute checksum", key="hash_file_uploader")
+    if hash_file is not None:
+        file_bytes = hash_file.getvalue()
+        file_md5 = hashlib.md5(file_bytes).hexdigest()
+        file_sha256 = hashlib.sha256(file_bytes).hexdigest()
+        active_sha256 = file_sha256
+        st.code(
+            f"File Name   : {hash_file.name}\n"
+            f"Size (Bytes): {len(file_bytes)}\n"
+            f"MD5         : {file_md5}\n"
+            f"SHA-256     : {file_sha256}",
+            language="text",
+        )
+
+    expected_hash = st.text_input(
+        "Compare against Expected Hash (SHA-256 or MD5)",
+        placeholder="Paste expected hash here to verify...",
+    ).strip().lower()
+    if expected_hash and active_sha256:
+        if expected_hash == active_sha256.lower():
+            st.success("✅ Hash Match! Integrity verified.")
+        else:
+            st.error("❌ Hash Mismatch! Value does not match the computed SHA-256.")
 
 # ==========================================
 # PAGE 5: INCIDENT PLAYBOOK
@@ -583,9 +735,12 @@ elif page == "Incident Playbook":
     )
 
     st.markdown("### ✅ RESPONSE CHECKLIST")
-    st.checkbox("Malicious source IPs added to firewall blocklist")
-    st.checkbox("Affected accounts rotated and MFA enforced")
-    st.checkbox("Post-incident timeline and root-cause notes recorded")
+    c1 = st.checkbox("Malicious source IPs added to firewall blocklist")
+    c2 = st.checkbox("Affected accounts rotated and MFA enforced")
+    c3 = st.checkbox("Post-incident timeline and root-cause notes recorded")
+
+    completed_steps = sum([c1, c2, c3])
+    st.progress(completed_steps / 3, text=f"Response Progress: {completed_steps}/3 steps completed")
 
 # ==========================================
 # PAGE 6: SYSTEM INFO
